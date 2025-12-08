@@ -6,8 +6,8 @@
 
     <style>
       html, body {
-        overflow-x: hidden; /* prevent any sideways scrolling */
         max-width: 100%;
+        overflow-x: hidden; /* Prevent page expansion */
       }
 
       body {
@@ -27,13 +27,13 @@
 
       .settings {
         margin: 20px;
-        font-size: 16px;
+        font-size: 16px; /* desktop body */
       }
 
       .settings h2 {
         margin-top: 0;
         margin-bottom: 10px;
-        font-size: 20px;
+        font-size: 20px; /* desktop header */
       }
 
       /* Desktop alignment */
@@ -48,13 +48,13 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin-top: -5px;
+        margin-top: -5px;  /* calibrated desktop vertical alignment */
       }
 
       .coord-row input[type="text"] {
         width: 220px;
         padding: 6px;
-        font-size: 16px;
+        font-size: 16px; /* desktop textbox text */
       }
 
       #start-coordinate[disabled] {
@@ -74,7 +74,20 @@
         margin-right: auto;
       }
 
-      /* Desktop tooltip */
+      /* NEW — Tooltip clipping wrapper */
+      .tooltip-container {
+        position: relative;
+        display: inline-block;
+        overflow: hidden; /* prevents page expansion */
+        max-width: 0;     /* container itself occupies no width */
+      }
+
+      /* Tooltip stays single-line */
+      .tooltip {
+        white-space: nowrap;
+      }
+
+      /* Desktop hover-tooltip */
       .info-icon {
         cursor: pointer;
         font-size: 13px;
@@ -109,10 +122,6 @@
         pointer-events: none;
         transition: opacity 0.2s ease;
         z-index: 10;
-
-        /* KEY RULES — NEVER WRAP */
-        white-space: nowrap;
-        max-width: none;
       }
 
       /* MOBILE VERSION */
@@ -138,7 +147,7 @@
 
         .coord-row > span {
           flex-basis: 100%;
-          margin-bottom: 0px;
+          margin-bottom: 0px; /* tightened spacing */
         }
 
         .textbox-column {
@@ -153,10 +162,10 @@
           font-size: 16px;
         }
 
-        /* Move Random upward — customizable */
+        /* Adjust vertical position of Random ONLY */
         .coord-row > label:last-child {
           margin-left: 8px;
-          margin-top: -27px;
+          margin-top: -27px; /* adjustable */
         }
 
         .coord-help {
@@ -170,12 +179,10 @@
         }
       }
 
-      /* Visible tooltip (mobile toggle) */
       .tooltip.visible {
         opacity: 1 !important;
         pointer-events: auto;
       }
-
     </style>
   </head>
 
@@ -200,8 +207,10 @@
           <div class="coord-help">
             DMS or decimal 
             <span class="info-icon" id="info-icon">i
-              <span class="tooltip" id="tooltip">
-                Example: 40.748, -73.985 or 40°44'54"N 73°59'8"W
+              <span class="tooltip-container">
+                <span class="tooltip" id="tooltip">
+                  Example: 40.748, -73.985 or 40°44'54"N 73°59'8"W
+                </span>
               </span>
             </span>
           </div>
@@ -234,18 +243,15 @@
       const infoIcon = document.getElementById("info-icon");
       const tooltip = document.getElementById("tooltip");
 
-      /* ⭐ Improved tooltip overflow correction */
       function adjustTooltipPosition() {
         if (!isMobile()) return;
 
-        tooltip.style.transform = "none"; // reset
-
+        tooltip.style.transform = "none";
         const rect = tooltip.getBoundingClientRect();
         const overflowRight = rect.right - window.innerWidth;
-        const margin = 12; // cosmetic padding from edge
 
         if (overflowRight > 0) {
-          tooltip.style.transform = `translateX(-${overflowRight + margin}px)`;
+          tooltip.style.transform = `translateX(-${overflowRight + 8}px)`;
         }
       }
 
