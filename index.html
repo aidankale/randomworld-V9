@@ -52,6 +52,12 @@
         font-size: 16px;
       }
 
+      #start-coordinate[disabled] {
+        background-color: #f0f0f0;
+        color: #888;
+        opacity: 0.7;
+      }
+
       .coord-help {
         margin-top: 4px;
         font-size: 13px;
@@ -78,19 +84,19 @@
         font-weight: bold;
         margin-left: 4px;
         position: relative;
-        pointer-events: auto !important; /* Ensure it's clickable on mobile */
+        pointer-events: auto !important; /* ensure it's tappable on mobile */
       }
 
-      /* Tooltip for desktop */
+      /* Tooltip (desktop) */
       .tooltip {
         position: absolute;
-        bottom: 20px;
+        bottom: 20px;          /* above the icon */
         left: 50%;
         transform: translateX(-50%);
         background: #333;
         color: white;
         padding: 6px 8px;
-        font-size: 10px;    /* <-- requested 10px */
+        font-size: 10px;       /* 10px as requested */
         border-radius: 5px;
         white-space: nowrap;
         opacity: 0;
@@ -99,7 +105,7 @@
         z-index: 9999;
       }
 
-      /* Desktop hover ONLY (prevents hover from interfering on mobile) */
+      /* Desktop hover ONLY */
       @media (hover: hover) and (pointer: fine) {
         .info-icon:hover .tooltip {
           opacity: 1 !important;
@@ -107,7 +113,7 @@
         }
       }
 
-      /* Mobile version */
+      /* MOBILE VERSION */
       @media (max-width: 768px) {
 
         #map-placeholder {
@@ -150,7 +156,7 @@
           margin-top: -27px;
         }
 
-        /* On mobile, tooltip starts hidden but hover never applies */
+        /* On mobile, base tooltip is hidden; visible class controls showing */
         .tooltip {
           opacity: 0 !important;
           pointer-events: none !important;
@@ -201,6 +207,7 @@
     </div>
 
     <script>
+      /* Grey-out behavior */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
 
@@ -208,6 +215,7 @@
         coordInput.disabled = randomBox.checked;
       });
 
+      /* Mobile detection */
       function isMobile() {
         return (
           "ontouchstart" in window ||
@@ -232,13 +240,14 @@
           tooltip.style.position = "fixed";
           tooltip.style.left = `${r.left + r.width / 2}px`;
           tooltip.style.bottom = `${window.innerHeight - r.top + 20}px`;
-          tooltip.style.transform = "translateX(-50%)`;
+          tooltip.style.transform = "translateX(-50%)";
         }
       });
 
-      /* Tap outside to close */
+      /* Tap outside to close on mobile */
       document.body.addEventListener("click", (e) => {
         if (!isMobile()) return;
+
         if (!tooltip.contains(e.target) && !infoIcon.contains(e.target)) {
           tooltip.classList.remove("visible");
         }
