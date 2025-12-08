@@ -36,7 +36,6 @@
         font-size: 20px; /* desktop header */
       }
 
-      /* Desktop alignment */
       .coord-row {
         margin-top: 15px;
         display: flex;
@@ -48,13 +47,13 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin-top: -5px;  /* calibrated desktop vertical alignment */
+        margin-top: -5px;
       }
 
       .coord-row input[type="text"] {
         width: 220px;
         padding: 6px;
-        font-size: 16px; /* desktop textbox text */
+        font-size: 16px;
       }
 
       #start-coordinate[disabled] {
@@ -74,20 +73,33 @@
         margin-right: auto;
       }
 
-      /* NEW — Tooltip clipping wrapper */
+      /* Tooltip container fix */
       .tooltip-container {
         position: relative;
         display: inline-block;
-        overflow: hidden; /* prevents page expansion */
-        max-width: 0;     /* container itself occupies no width */
+        overflow: hidden; /* prevents rightward overflow */
+        max-width: 1px;   /* allows tooltip to emerge left */
+        vertical-align: top;
       }
 
-      /* Tooltip stays single-line */
+      /* Tooltip */
       .tooltip {
-        white-space: nowrap;
+        position: absolute;
+        top: 20px;
+        right: 0;   /* grow leftward */
+        left: auto;
+        background: #333;
+        color: white;
+        padding: 8px 10px;
+        font-size: 12px;
+        border-radius: 5px;
+        white-space: nowrap; /* no wrapping */
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        z-index: 10;
       }
 
-      /* Desktop hover-tooltip */
       .info-icon {
         cursor: pointer;
         font-size: 13px;
@@ -109,22 +121,7 @@
         pointer-events: auto;
       }
 
-      .tooltip {
-        position: absolute;
-        top: 20px;
-        left: 0;
-        background: #333;
-        color: white;
-        padding: 8px 10px;
-        font-size: 12px;
-        border-radius: 5px;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s ease;
-        z-index: 10;
-      }
-
-      /* MOBILE VERSION */
+      /* Mobile layout */
       @media (max-width: 768px) {
 
         #map-placeholder {
@@ -147,7 +144,7 @@
 
         .coord-row > span {
           flex-basis: 100%;
-          margin-bottom: 0px; /* tightened spacing */
+          margin-bottom: 0px;
         }
 
         .textbox-column {
@@ -162,10 +159,9 @@
           font-size: 16px;
         }
 
-        /* Adjust vertical position of Random ONLY */
         .coord-row > label:last-child {
           margin-left: 8px;
-          margin-top: -27px; /* adjustable */
+          margin-top: -27px; /* your alignment */
         }
 
         .coord-help {
@@ -199,6 +195,7 @@
       </label>
 
       <div class="coord-row">
+
         <span>Starting coordinate:</span>
 
         <div class="textbox-column">
@@ -220,8 +217,8 @@
           <input type="checkbox" id="random-start">
           Random
         </label>
-      </div>
 
+      </div>
     </div>
 
     <script>
@@ -247,11 +244,12 @@
         if (!isMobile()) return;
 
         tooltip.style.transform = "none";
-        const rect = tooltip.getBoundingClientRect();
-        const overflowRight = rect.right - window.innerWidth;
 
-        if (overflowRight > 0) {
-          tooltip.style.transform = `translateX(-${overflowRight + 8}px)`;
+        const rect = tooltip.getBoundingClientRect();
+        const overflowLeft = rect.left;
+
+        if (overflowLeft < 0) {
+          tooltip.style.transform = `translateX(${-overflowLeft + 8}px)`;
         }
       }
 
