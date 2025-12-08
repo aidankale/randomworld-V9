@@ -44,7 +44,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin-top: -5px;  /* your calibrated perfect desktop alignment */
+        margin-top: -5px;  /* calibrated desktop vertical alignment */
       }
 
       .coord-row input[type="text"] {
@@ -101,7 +101,7 @@
         padding: 8px 10px;
         font-size: 12px;
         border-radius: 5px;
-        white-space: nowrap; /* NEVER WRAP */
+        white-space: nowrap;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s ease;
@@ -129,17 +129,16 @@
           align-items: center;
         }
 
-        /* Starting coordinate label */
         .coord-row > span {
           flex-basis: 100%;
           margin-bottom: 0px; /* tighten gap between label + textbox */
         }
 
-        /* FIX: pull textbox upward on mobile */
+        /* ✔ FIX: Close the gap between label and textbox */
         .textbox-column {
           width: 70%;
           align-items: flex-start;
-          margin-top: -5px; /* THIS IS THE IMPORTANT FIX */
+          margin-top: -5px; /* adjust tighter or looser if needed */
         }
 
         .coord-row input[type="text"] {
@@ -148,8 +147,10 @@
           font-size: 16px;
         }
 
+        /* ✔ NEW: Adjust vertical position of the Random label ONLY */
         .coord-row > label:last-child {
           margin-left: 8px;
+          margin-top: -6px; /* <-- YOU CAN CHANGE THIS NUMBER */
         }
 
         .coord-help {
