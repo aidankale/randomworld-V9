@@ -101,30 +101,31 @@
         padding: 8px 10px;
         font-size: 12px;
         border-radius: 5px;
-        white-space: nowrap;
+        white-space: nowrap; /* NEVER WRAP */
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s ease;
         z-index: 10;
       }
 
-      /* -----------------------------------
-         MOBILE VERSION (touch devices)
-      ----------------------------------- */
+      /* MOBILE VERSION */
       @media (max-width: 768px) {
         #map-placeholder {
           height: 40vh;
         }
 
+        /* BODY TEXT: proportional +2 boost */
         .settings {
           font-size: 16px;
           margin: 15px;
         }
 
+        /* HEADER TEXT: proportional +2 boost */
         .settings h2 {
           font-size: 20px;
         }
 
+        /* MOBILE TEXTBOX + RANDOM POSITIONING */
         .coord-row {
           flex-wrap: wrap;
           align-items: center;
@@ -141,38 +142,32 @@
           margin-top: 0;
         }
 
+        /* TEXTBOX FONT SIZE: proportional +2 → 18 */
         .coord-row input[type="text"] {
           width: 100%;
           padding: 8px;
           font-size: 18px;
         }
 
+        /* Random next to textbox */
         .coord-row > label:last-child {
           margin-left: 8px;
         }
 
+        /* Helper text: proportional +2 → 15 */
         .coord-help {
           width: 100%;
           font-size: 15px;
         }
 
-        /* Remove hover on mobile */
+        /* Disable desktop hover rule on mobile (JS handles tap) */
         .info-icon:hover .tooltip {
           opacity: 0;
           pointer-events: none;
         }
-
-        /* FIX: prevent tooltip from causing horizontal scrolling */
-        .coord-help .tooltip {
-          left: auto !important;
-          right: 0;              /* anchor tooltip inside screen */
-          max-width: 90vw;       /* NEVER exceed viewport width */
-          white-space: normal;   /* allow wrapping */
-          word-break: break-word;
-        }
       }
 
-      /* Mobile tap-visible tooltip */
+      /* Tooltip visible class (mobile) */
       .tooltip.visible {
         opacity: 1 !important;
         pointer-events: auto;
@@ -201,7 +196,7 @@
           <div class="coord-help">
             DMS or decimal 
             <span class="info-icon" id="info-icon">i
-              <span class="tooltip">
+              <span class="tooltip" id="tooltip">
                 Example: 40.748, -73.985 or 40°44'54"N 73°59'8"W
               </span>
             </span>
@@ -228,9 +223,7 @@
       });
 
       /* ----------------------------
-         TOOLTIP LOGIC
-         Desktop = hover
-         Mobile = tap toggle
+         TRUE MOBILE DETECTION
       ---------------------------- */
       function isMobile() {
         return (
@@ -241,12 +234,36 @@
       }
 
       const infoIcon = document.getElementById("info-icon");
-      const tooltip = infoIcon.querySelector(".tooltip");
+      const tooltip = document.getElementById("tooltip");
 
+      /* ----------------------------
+         MOBILE TOOLTIP POSITION FIX
+      ---------------------------- */
+      function adjustTooltipPosition() {
+        if (!isMobile()) return;
+
+        tooltip.style.transform = "none"; // reset
+
+        const rect = tooltip.getBoundingClientRect();
+        const overflowRight = rect.right - window.innerWidth;
+
+        if (overflowRight > 0) {
+          tooltip.style.transform = `translateX(-${overflowRight + 8}px)`; 
+        }
+      }
+
+      /* ----------------------------
+         MOBILE TAP TOGGLE
+      ---------------------------- */
       infoIcon.addEventListener("click", (e) => {
-        if (!isMobile()) return; 
+        if (!isMobile()) return;
         e.stopPropagation();
+
         tooltip.classList.toggle("visible");
+
+        if (tooltip.classList.contains("visible")) {
+          requestAnimationFrame(adjustTooltipPosition);
+        }
       });
 
       document.addEventListener("click", () => {
