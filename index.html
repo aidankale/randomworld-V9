@@ -32,7 +32,6 @@
         font-size: 20px;
       }
 
-      /* Desktop alignment */
       .coord-row {
         margin-top: 15px;
         display: flex;
@@ -64,7 +63,6 @@
         margin-right: auto;
       }
 
-      /* Info icon */
       .info-icon {
         cursor: pointer;
         font-size: 13px;
@@ -81,16 +79,16 @@
         position: relative;
       }
 
-      /* Tooltip for desktop */
+      /* TOOLTIP (desktop) */
       .tooltip {
         position: absolute;
-        bottom: 20px;          
+        bottom: 20px;
         left: 50%;
         transform: translateX(-50%);
         background: #333;
         color: white;
-        padding: 6px 8px;             /* smaller to match 8px font */
-        font-size: 8px;               /* ↓ 4px smaller as requested */
+        padding: 6px 8px;
+        font-size: 10px;     /* ← new font size */
         border-radius: 5px;
         white-space: nowrap;
         opacity: 0;
@@ -99,13 +97,11 @@
         z-index: 9999;
       }
 
-      /* Desktop hover */
       .info-icon:hover .tooltip {
         opacity: 1;
         pointer-events: auto;
       }
 
-      /* MOBILE VERSION */
       @media (max-width: 768px) {
 
         #map-placeholder {
@@ -143,25 +139,28 @@
           font-size: 16px;
         }
 
-        /* Move Random text upward */
         .coord-row > label:last-child {
           margin-left: 8px;
           margin-top: -27px;
         }
 
-        /* Disable desktop hover on mobile */
+        /* Disable hover */
         .info-icon:hover .tooltip {
           opacity: 0 !important;
           pointer-events: none !important;
         }
-      }
 
-      /* Tooltip visible class for mobile */
-      .tooltip.visible {
-        opacity: 1 !important;
-        pointer-events: auto !important;
-      }
+        /* REAL MOBILE OVERRIDES */
+        .tooltip {
+          opacity: 0 !important;
+          pointer-events: none !important;
+        }
 
+        .tooltip.visible {
+          opacity: 1 !important;
+          pointer-events: auto !important;
+        }
+      }
     </style>
   </head>
 
@@ -202,7 +201,6 @@
     </div>
 
     <script>
-      /* Grey-out */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
 
@@ -210,7 +208,6 @@
         coordInput.disabled = randomBox.checked;
       });
 
-      /* Device detection */
       function isMobile() {
         return (
           "ontouchstart" in window ||
@@ -235,14 +232,17 @@
           tooltip.style.position = "fixed";
           tooltip.style.left = `${r.left + r.width / 2}px`;
           tooltip.style.bottom = `${window.innerHeight - r.top + 20}px`;
-          tooltip.style.transform = "translateX(-50%)";
+          tooltip.style.transform = "translateX(-50%)`;
         }
       });
 
-      /* Tap anywhere to close */
-      document.addEventListener("click", () => {
+      /* Close only if clicking away */
+      document.body.addEventListener("click", (e) => {
         if (!isMobile()) return;
-        tooltip.classList.remove("visible");
+
+        if (!tooltip.contains(e.target) && !infoIcon.contains(e.target)) {
+          tooltip.classList.remove("visible");
+        }
       });
     </script>
 
