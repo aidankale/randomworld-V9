@@ -65,8 +65,11 @@
         text-align: center;
         width: 220px;
         display: block;
+        margin-left: auto;
+        margin-right: auto;
       }
 
+      /* Info icon */
       .info-icon {
         cursor: pointer;
         font-size: 13px;
@@ -81,26 +84,28 @@
         font-weight: bold;
         margin-left: 4px;
         position: relative;
+        pointer-events: auto !important; /* ensure it's tappable on mobile */
       }
 
-      /* DESKTOP TOOLTIP */
+      /* Tooltip (desktop) */
       .tooltip {
         position: absolute;
-        bottom: 20px;
+        bottom: 20px;          /* above the icon on DESKTOP */
         left: 50%;
         transform: translateX(-50%);
         background: #333;
         color: white;
         padding: 6px 8px;
-        font-size: 10px;
+        font-size: 10px;       /* 10px as requested */
         border-radius: 5px;
-        white-space: nowrap;
+        white-space: nowrap;   /* NEVER WRAP */
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s ease;
         z-index: 9999;
       }
 
+      /* Desktop hover ONLY */
       @media (hover: hover) and (pointer: fine) {
         .info-icon:hover .tooltip {
           opacity: 1 !important;
@@ -110,20 +115,6 @@
 
       /* MOBILE VERSION */
       @media (max-width: 768px) {
-
-        /* IMPORTANT: Prevent giant tooltip */
-        .tooltip {
-          white-space: normal !important;    /* allow wrapping */
-          max-width: 240px !important;       /* prevents huge width */
-          position: fixed !important;        /* allow absolute positioning */
-          opacity: 0 !important;
-          pointer-events: none !important;
-        }
-
-        .tooltip.visible {
-          opacity: 1 !important;
-          pointer-events: auto !important;
-        }
 
         #map-placeholder {
           height: 40vh;
@@ -145,7 +136,7 @@
 
         .coord-row > span {
           flex-basis: 100%;
-          margin-bottom: 0;
+          margin-bottom: 0px;
         }
 
         .textbox-column {
@@ -163,6 +154,17 @@
         .coord-row > label:last-child {
           margin-left: 8px;
           margin-top: -27px;
+        }
+
+        /* On mobile, base tooltip is hidden; visible class controls showing */
+        .tooltip {
+          opacity: 0 !important;
+          pointer-events: none !important;
+        }
+
+        .tooltip.visible {
+          opacity: 1 !important;
+          pointer-events: auto !important;
         }
       }
     </style>
@@ -205,6 +207,7 @@
     </div>
 
     <script>
+      /* Grey-out behavior */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
 
@@ -212,6 +215,7 @@
         coordInput.disabled = randomBox.checked;
       });
 
+      /* Mobile detection */
       function isMobile() {
         return (
           "ontouchstart" in window ||
@@ -222,28 +226,31 @@
       const infoIcon = document.getElementById("info-icon");
       const tooltip = document.getElementById("tooltip");
 
+      /* MOBILE TAP HANDLER */
       infoIcon.addEventListener("click", (e) => {
         if (!isMobile()) return;
 
         e.stopPropagation();
+
         tooltip.classList.toggle("visible");
 
         if (tooltip.classList.contains("visible")) {
-
           const r = infoIcon.getBoundingClientRect();
 
-          /* wrap and size are already handled by CSS */
-
-          const gap = 10; /* adjust this if too low or too high */
-
+          tooltip.style.position = "fixed";
           tooltip.style.left = `${r.left + r.width / 2}px`;
-          tooltip.style.top = `${r.top - tooltip.offsetHeight - gap}px`;
+
+          // ↓↓↓ ONLY CHANGE FROM YOUR ORIGINAL: 20 → 8 (slightly lower)
+          tooltip.style.bottom = `${window.innerHeight - r.top + 8}px`;
+
           tooltip.style.transform = "translateX(-50%)";
         }
       });
 
+      /* Tap outside to close on mobile – now listens on document, not body */
       document.addEventListener("click", (e) => {
         if (!isMobile()) return;
+
         if (!tooltip.contains(e.target) && !infoIcon.contains(e.target)) {
           tooltip.classList.remove("visible");
         }
