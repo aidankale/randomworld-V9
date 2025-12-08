@@ -114,13 +114,13 @@
           height: 40vh;
         }
 
-        /* BODY TEXT: proportional +2 boost */
+        /* BODY TEXT */
         .settings {
           font-size: 16px;
           margin: 15px;
         }
 
-        /* HEADER TEXT: proportional +2 boost */
+        /* HEADER TEXT */
         .settings h2 {
           font-size: 20px;
         }
@@ -131,10 +131,12 @@
           align-items: center;
         }
 
+        /* ****** FIXED SPACING — THIS BLOCK IS THE IMPORTANT ONE ****** */
         .coord-row > span {
           flex-basis: 100%;
-          margin-bottom: 4px;
+          margin-bottom: 0px; /* tighten gap between "Starting coordinate" and textbox */
         }
+        /* ************************************************************** */
 
         .textbox-column {
           width: 70%;
@@ -142,19 +144,16 @@
           margin-top: 0;
         }
 
-        /* TEXTBOX FONT SIZE: proportional +2 → 18 */
         .coord-row input[type="text"] {
           width: 100%;
           padding: 8px;
           font-size: 16px;
         }
 
-        /* Random next to textbox */
         .coord-row > label:last-child {
           margin-left: 8px;
         }
 
-        /* Helper text: proportional +2 → 15 */
         .coord-help {
           width: 100%;
           font-size: 13px;
@@ -164,10 +163,6 @@
         .info-icon:hover .tooltip {
           opacity: 0;
           pointer-events: none;
-        }
-
-        .coord-row label {
-          margin-top: -30px; /* Or even 0px if needed */
         }
       }
 
