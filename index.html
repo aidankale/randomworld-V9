@@ -65,8 +65,6 @@
         text-align: center;
         width: 220px;
         display: block;
-        margin-left: auto;
-        margin-right: auto;
       }
 
       .info-icon {
@@ -83,13 +81,12 @@
         font-weight: bold;
         margin-left: 4px;
         position: relative;
-        pointer-events: auto !important;
       }
 
-      /* DESKTOP tooltip styling */
+      /* DESKTOP TOOLTIP */
       .tooltip {
         position: absolute;
-        bottom: 20px; /* Good original desktop placement */
+        bottom: 20px;
         left: 50%;
         transform: translateX(-50%);
         background: #333;
@@ -104,7 +101,6 @@
         z-index: 9999;
       }
 
-      /* Hover effect only on desktop */
       @media (hover: hover) and (pointer: fine) {
         .info-icon:hover .tooltip {
           opacity: 1 !important;
@@ -114,6 +110,20 @@
 
       /* MOBILE VERSION */
       @media (max-width: 768px) {
+
+        /* IMPORTANT: Prevent giant tooltip */
+        .tooltip {
+          white-space: normal !important;    /* allow wrapping */
+          max-width: 240px !important;       /* prevents huge width */
+          position: fixed !important;        /* allow absolute positioning */
+          opacity: 0 !important;
+          pointer-events: none !important;
+        }
+
+        .tooltip.visible {
+          opacity: 1 !important;
+          pointer-events: auto !important;
+        }
 
         #map-placeholder {
           height: 40vh;
@@ -135,7 +145,7 @@
 
         .coord-row > span {
           flex-basis: 100%;
-          margin-bottom: 0px;
+          margin-bottom: 0;
         }
 
         .textbox-column {
@@ -153,17 +163,6 @@
         .coord-row > label:last-child {
           margin-left: 8px;
           margin-top: -27px;
-        }
-
-        /* Mobile tooltip hidden until tapped */
-        .tooltip {
-          opacity: 0 !important;
-          pointer-events: none !important;
-        }
-
-        .tooltip.visible {
-          opacity: 1 !important;
-          pointer-events: auto !important;
         }
       }
     </style>
@@ -206,7 +205,6 @@
     </div>
 
     <script>
-      /* Grey-out behavior */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
 
@@ -214,7 +212,6 @@
         coordInput.disabled = randomBox.checked;
       });
 
-      /* Mobile detection */
       function isMobile() {
         return (
           "ontouchstart" in window ||
@@ -225,7 +222,6 @@
       const infoIcon = document.getElementById("info-icon");
       const tooltip = document.getElementById("tooltip");
 
-      /* MOBILE TAP HANDLER */
       infoIcon.addEventListener("click", (e) => {
         if (!isMobile()) return;
 
@@ -236,21 +232,18 @@
 
           const r = infoIcon.getBoundingClientRect();
 
-          /* Position centered ABOVE icon—same as Script A but slightly lowered */
-          tooltip.style.position = "fixed";
+          /* wrap and size are already handled by CSS */
+
+          const gap = 10; /* adjust this if too low or too high */
+
           tooltip.style.left = `${r.left + r.width / 2}px`;
-
-          /* Lowered slightly so it's not too high */
-          tooltip.style.top = `${r.top - 5}px`;
-
+          tooltip.style.top = `${r.top - tooltip.offsetHeight - gap}px`;
           tooltip.style.transform = "translateX(-50%)";
         }
       });
 
-      /* Tap outside to close on mobile */
       document.addEventListener("click", (e) => {
         if (!isMobile()) return;
-
         if (!tooltip.contains(e.target) && !infoIcon.contains(e.target)) {
           tooltip.classList.remove("visible");
         }
