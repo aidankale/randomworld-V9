@@ -27,13 +27,13 @@
 
       .settings {
         margin: 20px;
-        font-size: 16px; /* desktop body */
+        font-size: 16px;
       }
 
       .settings h2 {
         margin-top: 0;
         margin-bottom: 10px;
-        font-size: 20px; /* desktop header */
+        font-size: 20px;
       }
 
       .coord-row {
@@ -73,27 +73,38 @@
         margin-right: auto;
       }
 
-      /* Tooltip container fix */
+      /* -------------------------------------- */
+      /* CORRECTED TOOLTIP CONTAINER            */
+      /* -------------------------------------- */
       .tooltip-container {
         position: relative;
         display: inline-block;
-        overflow: hidden; /* prevents rightward overflow */
-        max-width: 1px;   /* allows tooltip to emerge left */
-        vertical-align: top;
+
+        /* Hide only RIGHT overflow */
+        overflow-x: clip;
+        overflow-y: visible;
+
+        /* Allow tooltip to be fully visible leftward */
+        max-width: 100%;
       }
 
-      /* Tooltip */
+      /* -------------------------------------- */
+      /* TOOLTIP ITSELF                         */
+      /* -------------------------------------- */
       .tooltip {
         position: absolute;
         top: 20px;
-        right: 0;   /* grow leftward */
+
+        /* EXPAND LEFT */
+        right: 0;
         left: auto;
+
         background: #333;
         color: white;
         padding: 8px 10px;
         font-size: 12px;
         border-radius: 5px;
-        white-space: nowrap; /* no wrapping */
+        white-space: nowrap;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s ease;
@@ -121,7 +132,9 @@
         pointer-events: auto;
       }
 
-      /* Mobile layout */
+      /* -------------------------------------- */
+      /* MOBILE VERSION                          */
+      /* -------------------------------------- */
       @media (max-width: 768px) {
 
         #map-placeholder {
@@ -159,9 +172,10 @@
           font-size: 16px;
         }
 
+        /* Adjust position of Random on mobile */
         .coord-row > label:last-child {
           margin-left: 8px;
-          margin-top: -27px; /* your alignment */
+          margin-top: -27px;
         }
 
         .coord-help {
