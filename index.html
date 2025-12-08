@@ -63,6 +63,7 @@
         margin-right: auto;
       }
 
+      /* Info icon */
       .info-icon {
         cursor: pointer;
         font-size: 13px;
@@ -77,9 +78,10 @@
         font-weight: bold;
         margin-left: 4px;
         position: relative;
+        pointer-events: auto !important; /* Ensure it's clickable on mobile */
       }
 
-      /* TOOLTIP (desktop) */
+      /* Tooltip for desktop */
       .tooltip {
         position: absolute;
         bottom: 20px;
@@ -88,7 +90,7 @@
         background: #333;
         color: white;
         padding: 6px 8px;
-        font-size: 10px;     /* ← new font size */
+        font-size: 10px;    /* <-- requested 10px */
         border-radius: 5px;
         white-space: nowrap;
         opacity: 0;
@@ -97,11 +99,15 @@
         z-index: 9999;
       }
 
-      .info-icon:hover .tooltip {
-        opacity: 1;
-        pointer-events: auto;
+      /* Desktop hover ONLY (prevents hover from interfering on mobile) */
+      @media (hover: hover) and (pointer: fine) {
+        .info-icon:hover .tooltip {
+          opacity: 1 !important;
+          pointer-events: auto !important;
+        }
       }
 
+      /* Mobile version */
       @media (max-width: 768px) {
 
         #map-placeholder {
@@ -144,13 +150,7 @@
           margin-top: -27px;
         }
 
-        /* Disable hover */
-        .info-icon:hover .tooltip {
-          opacity: 0 !important;
-          pointer-events: none !important;
-        }
-
-        /* REAL MOBILE OVERRIDES */
+        /* On mobile, tooltip starts hidden but hover never applies */
         .tooltip {
           opacity: 0 !important;
           pointer-events: none !important;
@@ -218,7 +218,7 @@
       const infoIcon = document.getElementById("info-icon");
       const tooltip = document.getElementById("tooltip");
 
-      /* MOBILE BEHAVIOR */
+      /* MOBILE TAP HANDLER */
       infoIcon.addEventListener("click", (e) => {
         if (!isMobile()) return;
 
@@ -236,10 +236,9 @@
         }
       });
 
-      /* Close only if clicking away */
+      /* Tap outside to close */
       document.body.addEventListener("click", (e) => {
         if (!isMobile()) return;
-
         if (!tooltip.contains(e.target) && !infoIcon.contains(e.target)) {
           tooltip.classList.remove("visible");
         }
