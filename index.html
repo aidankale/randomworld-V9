@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
+
+      /* ------------------------------
+         GLOBAL SCROLLING FIX
+         (Prevents horizontal overflow)
+      ------------------------------ */
+      html, body {
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+
       body {
         margin: 0;
         padding: 0;
@@ -134,7 +144,7 @@
           margin-bottom: 0px; /* tighten gap between label + textbox */
         }
 
-        /* ✔ FIX: Close the gap between label and textbox */
+        /* Close the gap between label and textbox */
         .textbox-column {
           width: 70%;
           align-items: flex-start;
@@ -147,7 +157,7 @@
           font-size: 16px;
         }
 
-        /* ✔ NEW: Adjust vertical position of the Random label ONLY */
+        /* Move the Random label upward (adjustable) */
         .coord-row > label:last-child {
           margin-left: 8px;
           margin-top: -27px; /* <-- YOU CAN CHANGE THIS NUMBER */
