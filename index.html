@@ -44,7 +44,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin-top: -5px;  /* your calibrated perfect vertical alignment */
+        margin-top: -5px;  /* your calibrated perfect desktop alignment */
       }
 
       .coord-row input[type="text"] {
@@ -110,38 +110,36 @@
 
       /* MOBILE VERSION */
       @media (max-width: 768px) {
+
         #map-placeholder {
           height: 40vh;
         }
 
-        /* BODY TEXT */
         .settings {
           font-size: 16px;
           margin: 15px;
         }
 
-        /* HEADER TEXT */
         .settings h2 {
           font-size: 20px;
         }
 
-        /* MOBILE TEXTBOX + RANDOM POSITIONING */
         .coord-row {
           flex-wrap: wrap;
           align-items: center;
         }
 
-        /* ****** FIXED SPACING — THIS BLOCK IS THE IMPORTANT ONE ****** */
+        /* Starting coordinate label */
         .coord-row > span {
           flex-basis: 100%;
-          margin-bottom: 0px; /* tighten gap between "Starting coordinate" and textbox */
+          margin-bottom: 0px; /* tighten gap between label + textbox */
         }
-        /* ************************************************************** */
 
+        /* FIX: pull textbox upward on mobile */
         .textbox-column {
           width: 70%;
           align-items: flex-start;
-          margin-top: 0;
+          margin-top: -5px; /* THIS IS THE IMPORTANT FIX */
         }
 
         .coord-row input[type="text"] {
@@ -159,14 +157,12 @@
           font-size: 13px;
         }
 
-        /* Disable desktop hover rule on mobile (JS handles tap) */
         .info-icon:hover .tooltip {
           opacity: 0;
           pointer-events: none;
         }
       }
 
-      /* Tooltip visible class (mobile) */
       .tooltip.visible {
         opacity: 1 !important;
         pointer-events: auto;
@@ -211,9 +207,6 @@
     </div>
 
     <script>
-      /* ----------------------------
-         GREY-OUT BEHAVIOR
-      ---------------------------- */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
 
@@ -221,9 +214,6 @@
         coordInput.disabled = randomBox.checked;
       });
 
-      /* ----------------------------
-         TRUE MOBILE DETECTION
-      ---------------------------- */
       function isMobile() {
         return (
           "ontouchstart" in window ||
@@ -235,25 +225,18 @@
       const infoIcon = document.getElementById("info-icon");
       const tooltip = document.getElementById("tooltip");
 
-      /* ----------------------------
-         MOBILE TOOLTIP POSITION FIX
-      ---------------------------- */
       function adjustTooltipPosition() {
         if (!isMobile()) return;
 
-        tooltip.style.transform = "none"; // reset
-
+        tooltip.style.transform = "none";
         const rect = tooltip.getBoundingClientRect();
         const overflowRight = rect.right - window.innerWidth;
 
         if (overflowRight > 0) {
-          tooltip.style.transform = `translateX(-${overflowRight + 8}px)`; 
+          tooltip.style.transform = `translateX(-${overflowRight + 8}px)`;
         }
       }
 
-      /* ----------------------------
-         MOBILE TAP TOGGLE
-      ---------------------------- */
       infoIcon.addEventListener("click", (e) => {
         if (!isMobile()) return;
         e.stopPropagation();
