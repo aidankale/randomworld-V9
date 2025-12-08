@@ -5,12 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
+      html, body {
+        overflow-x: hidden; /* prevent any sideways scrolling */
+        max-width: 100%;
+      }
+
       body {
         margin: 0;
         padding: 0;
         font-family: sans-serif;
         line-height: 1.5;
-        overflow-x: hidden;
       }
 
       #map-placeholder {
@@ -32,6 +36,7 @@
         font-size: 20px;
       }
 
+      /* Desktop alignment */
       .coord-row {
         margin-top: 15px;
         display: flex;
@@ -43,7 +48,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        transform: translateY(-5px);
+        margin-top: -5px;
       }
 
       .coord-row input[type="text"] {
@@ -69,6 +74,7 @@
         margin-right: auto;
       }
 
+      /* Desktop tooltip */
       .info-icon {
         cursor: pointer;
         font-size: 13px;
@@ -99,11 +105,14 @@
         padding: 8px 10px;
         font-size: 12px;
         border-radius: 5px;
-        white-space: nowrap;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s ease;
         z-index: 10;
+
+        /* KEY RULES — NEVER WRAP */
+        white-space: nowrap;
+        max-width: none;
       }
 
       /* MOBILE VERSION */
@@ -135,7 +144,7 @@
         .textbox-column {
           width: 70%;
           align-items: flex-start;
-          transform: translateY(-5px);
+          margin-top: -5px;
         }
 
         .coord-row input[type="text"] {
@@ -144,20 +153,15 @@
           font-size: 16px;
         }
 
+        /* Move Random upward — customizable */
         .coord-row > label:last-child {
           margin-left: 8px;
-          transform: translateY(-27px);
+          margin-top: -27px;
         }
 
         .coord-help {
           width: 100%;
           font-size: 13px;
-        }
-
-        /* 🔥 FIX SIDE SCROLLING — tooltip can't overflow */
-        .tooltip {
-          max-width: 90vw;
-          white-space: normal;
         }
 
         .info-icon:hover .tooltip {
@@ -166,10 +170,12 @@
         }
       }
 
+      /* Visible tooltip (mobile toggle) */
       .tooltip.visible {
         opacity: 1 !important;
         pointer-events: auto;
       }
+
     </style>
   </head>
 
@@ -228,15 +234,18 @@
       const infoIcon = document.getElementById("info-icon");
       const tooltip = document.getElementById("tooltip");
 
+      /* ⭐ Improved tooltip overflow correction */
       function adjustTooltipPosition() {
         if (!isMobile()) return;
 
-        tooltip.style.transform = "none";
+        tooltip.style.transform = "none"; // reset
+
         const rect = tooltip.getBoundingClientRect();
         const overflowRight = rect.right - window.innerWidth;
+        const margin = 12; // cosmetic padding from edge
 
         if (overflowRight > 0) {
-          tooltip.style.transform = `translateX(-${overflowRight + 8}px)`;
+          tooltip.style.transform = `translateX(-${overflowRight + margin}px)`;
         }
       }
 
