@@ -69,7 +69,6 @@
         margin-right: auto;
       }
 
-      /* Info icon */
       .info-icon {
         cursor: pointer;
         font-size: 13px;
@@ -87,7 +86,6 @@
         pointer-events: auto !important;
       }
 
-      /* Tooltip (desktop) */
       .tooltip {
         position: absolute;
         bottom: 20px;
@@ -105,7 +103,6 @@
         z-index: 9999;
       }
 
-      /* Desktop hover */
       @media (hover: hover) and (pointer: fine) {
         .info-icon:hover .tooltip {
           opacity: 1 !important;
@@ -151,12 +148,12 @@
           font-size: 16px;
         }
 
-        /* PERFECT helper text centering under textbox */
+        /* ⭐ New tweak: nudge help text slightly right */
         .coord-help {
-          width: 70% !important;   /* same width as mobile textbox */
-          margin: 0 !important;    /* align to left of textbox */
-          text-align: center;      /* center text inside that width */
-          padding: 0;
+          width: 70% !important;
+          text-align: center;
+          margin-left: 6px;   /* ← adjust this number to fine-tune */
+          margin-right: 0;
         }
 
         .coord-row > label:last-child {
@@ -222,10 +219,7 @@
       });
 
       function isMobile() {
-        return (
-          "ontouchstart" in window ||
-          navigator.maxTouchPoints > 0
-        );
+        return ("ontouchstart" in window || navigator.maxTouchPoints > 0);
       }
 
       const infoIcon = document.getElementById("info-icon");
@@ -242,7 +236,7 @@
           tooltip.style.position = "fixed";
           tooltip.style.left = `${r.left + r.width / 2}px`;
           tooltip.style.bottom = `${window.innerHeight - r.top + 5}px`;
-          tooltip.style.transform = "translateX(-50%)`;
+          tooltip.style.transform = "translateX(-50%)";
         }
       });
 
