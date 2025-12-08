@@ -5,23 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
-
-      /* -------------------------------------------------
-         REAL FIX — prevents double scrolling,
-         prevents white bar, prevents horizontal overflow
-      -------------------------------------------------- */
-      html {
-        width: 100%;
-        overflow-x: hidden;
-      }
-
       body {
-        overflow-x: hidden;
-        overflow-y: visible; /* <-- CRITICAL */
         margin: 0;
         padding: 0;
         font-family: sans-serif;
         line-height: 1.5;
+        overflow-x: hidden; /* Prevent horizontal scrolling */
       }
 
       #map-placeholder {
@@ -34,13 +23,13 @@
 
       .settings {
         margin: 20px;
-        font-size: 16px; /* desktop body */
+        font-size: 16px;
       }
 
       .settings h2 {
         margin-top: 0;
         margin-bottom: 10px;
-        font-size: 20px; /* desktop header */
+        font-size: 20px;
       }
 
       /* Desktop alignment */
@@ -55,13 +44,13 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin-top: -5px;  /* calibrated desktop vertical alignment */
+        transform: translateY(-5px); /* REPLACEMENT FOR NEGATIVE MARGIN */
       }
 
       .coord-row input[type="text"] {
         width: 220px;
         padding: 6px;
-        font-size: 16px; /* desktop textbox text */
+        font-size: 16px;
       }
 
       #start-coordinate[disabled] {
@@ -81,7 +70,6 @@
         margin-right: auto;
       }
 
-      /* Desktop hover-tooltip */
       .info-icon {
         cursor: pointer;
         font-size: 13px;
@@ -142,14 +130,13 @@
 
         .coord-row > span {
           flex-basis: 100%;
-          margin-bottom: 0px; /* tighten gap between label + textbox */
+          margin-bottom: 0px;
         }
 
-        /* tighten label–textbox spacing */
         .textbox-column {
           width: 70%;
           align-items: flex-start;
-          margin-top: -5px;
+          transform: translateY(-5px); /* REPLACES margin-top:-5px */
         }
 
         .coord-row input[type="text"] {
@@ -158,10 +145,10 @@
           font-size: 16px;
         }
 
-        /* Move Random label upward (adjustable) */
+        /* Random label alignment FIX — uses transform instead of negative margin */
         .coord-row > label:last-child {
           margin-left: 8px;
-          margin-top: -27px; /* <-- ADJUST THIS NUMBER IF NEEDED */
+          transform: translateY(-27px); /* REPLACES margin-top:-27px */
         }
 
         .coord-help {
