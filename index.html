@@ -69,6 +69,7 @@
         margin-right: auto;
       }
 
+      /* Info icon */
       .info-icon {
         cursor: pointer;
         font-size: 13px;
@@ -86,6 +87,7 @@
         pointer-events: auto !important;
       }
 
+      /* Tooltip (desktop) */
       .tooltip {
         position: absolute;
         bottom: 20px;
@@ -103,6 +105,7 @@
         z-index: 9999;
       }
 
+      /* Desktop hover */
       @media (hover: hover) and (pointer: fine) {
         .info-icon:hover .tooltip {
           opacity: 1 !important;
@@ -136,19 +139,21 @@
           margin-bottom: 0px;
         }
 
-        /* ✔ FIXED: Center the textbox + helper text on mobile */
+        /* Restore textbox column to LEFT alignment */
         .textbox-column {
           width: 70%;
-          align-items: center;  /* ← changed from flex-start */
+          align-items: flex-start;
           margin-top: -5px;
         }
 
+        /* Shorter textbox on mobile */
         .coord-row input[type="text"] {
           width: 70%;
           padding: 8px;
           font-size: 16px;
         }
 
+        /* Center helper text under textbox only */
         .coord-help {
           width: 70% !important;
           text-align: center;
@@ -156,11 +161,13 @@
           margin-right: 0;
         }
 
+        /* Random checkbox position */
         .coord-row > label:last-child {
           margin-left: -60px;
           margin-top: -27px;
         }
 
+        /* Mobile tooltip */
         .tooltip {
           opacity: 0 !important;
           pointer-events: none !important;
