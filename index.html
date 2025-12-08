@@ -105,7 +105,7 @@
         z-index: 9999;
       }
 
-      /* Desktop hover */
+      /* Desktop hover ONLY */
       @media (hover: hover) and (pointer: fine) {
         .info-icon:hover .tooltip {
           opacity: 1 !important;
@@ -113,7 +113,9 @@
         }
       }
 
-      /* MOBILE VERSION */
+      /* ──────────────────────────────── */
+      /*           MOBILE VERSION         */
+      /* ──────────────────────────────── */
       @media (max-width: 768px) {
 
         #map-placeholder {
@@ -139,31 +141,34 @@
           margin-bottom: 0px;
         }
 
+        /* ✔ CENTER the textbox + helper text */
         .textbox-column {
-          width: 70%;
-          align-items: flex-start;
+          width: 100%;
+          align-items: center;   /* was flex-start */
           margin-top: -5px;
         }
 
+        /* ✔ Shorter textbox, centered */
         .coord-row input[type="text"] {
-          width: 70%;
+          width: 80%;           /* was 70% */
           padding: 8px;
           font-size: 16px;
         }
 
-        /* 💫 NEW: Re-center helper text under shorter textbox */
+        /* ✔ Recenter helper text */
         .coord-help {
-          width: 70% !important;
+          width: 80% !important;   /* match textbox width */
           text-align: center;
-          margin-left: 0;
-          margin-right: 0;
+          margin: 0 auto;
         }
 
+        /* Random checkbox position */
         .coord-row > label:last-child {
           margin-left: -60px;
           margin-top: -27px;
         }
 
+        /* Mobile tooltip hidden until tapped */
         .tooltip {
           opacity: 0 !important;
           pointer-events: none !important;
@@ -214,6 +219,7 @@
     </div>
 
     <script>
+      /* Grey-out behavior */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
 
@@ -221,6 +227,7 @@
         coordInput.disabled = randomBox.checked;
       });
 
+      /* Mobile detection */
       function isMobile() {
         return (
           "ontouchstart" in window ||
@@ -231,6 +238,7 @@
       const infoIcon = document.getElementById("info-icon");
       const tooltip = document.getElementById("tooltip");
 
+      /* MOBILE TAP HANDLER */
       infoIcon.addEventListener("click", (e) => {
         if (!isMobile()) return;
 
@@ -239,6 +247,7 @@
 
         if (tooltip.classList.contains("visible")) {
           const r = infoIcon.getBoundingClientRect();
+
           tooltip.style.position = "fixed";
           tooltip.style.left = `${r.left + r.width / 2}px`;
           tooltip.style.bottom = `${window.innerHeight - r.top + 5}px`;
@@ -246,6 +255,7 @@
         }
       });
 
+      /* Tap outside to close */
       document.addEventListener("click", (e) => {
         if (!isMobile()) return;
 
