@@ -110,7 +110,6 @@
         }
       }
 
-      /* MOBILE VERSION */
       @media (max-width: 768px) {
 
         #map-placeholder {
@@ -148,11 +147,10 @@
           font-size: 16px;
         }
 
-        /* ⭐ New tweak: nudge help text slightly right */
         .coord-help {
           width: 70% !important;
           text-align: center;
-          margin-left: 9px;   /* ← adjust this number to fine-tune */
+          margin-left: 9px;
           margin-right: 0;
         }
 
@@ -181,11 +179,19 @@
     <div class="settings">
       <h2>Settings</h2>
 
+      <!-- Existing checkbox -->
       <label>
         <input type="checkbox" id="land-restriction">
         Restrict all points to land
       </label>
 
+      <!-- ⭐ INSERTED HERE — WILL NOT BREAK LAYOUT -->
+      <label>
+        <input type="checkbox" id="avoid-antarctica">
+        Avoid Antarctica
+      </label>
+
+      <!-- The coordinate section stays exactly where it was -->
       <div class="coord-row">
         <span>Starting coordinate:</span>
 
