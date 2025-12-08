@@ -53,12 +53,6 @@
         font-size: 16px;
       }
 
-      #start-coordinate[disabled] {
-        background-color: #f0f0f0;
-        color: #888;
-        opacity: 0.7;
-      }
-
       .coord-help {
         margin-top: 4px;
         font-size: 13px;
@@ -87,22 +81,22 @@
         position: relative;
       }
 
-      /* Tooltip (desktop placement ONLY) */
+      /* Tooltip for desktop */
       .tooltip {
         position: absolute;
-        bottom: 20px;              /* Above the icon */
+        bottom: 20px;          
         left: 50%;
         transform: translateX(-50%);
         background: #333;
         color: white;
-        padding: 8px 10px;
-        font-size: 12px;
+        padding: 6px 8px;             /* smaller to match 8px font */
+        font-size: 8px;               /* ↓ 4px smaller as requested */
         border-radius: 5px;
         white-space: nowrap;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s ease;
-        z-index: 10000;
+        z-index: 9999;
       }
 
       /* Desktop hover */
@@ -152,21 +146,22 @@
         /* Move Random text upward */
         .coord-row > label:last-child {
           margin-left: 8px;
-          margin-top: -27px; /* adjustable */
+          margin-top: -27px;
         }
 
-        /* Disable hover behavior */
+        /* Disable desktop hover on mobile */
         .info-icon:hover .tooltip {
           opacity: 0 !important;
           pointer-events: none !important;
         }
       }
 
-      /* Mobile-visible tooltip */
+      /* Tooltip visible class for mobile */
       .tooltip.visible {
         opacity: 1 !important;
-        pointer-events: auto;
+        pointer-events: auto !important;
       }
+
     </style>
   </head>
 
@@ -207,7 +202,7 @@
     </div>
 
     <script>
-      /* Grey-out behavior */
+      /* Grey-out */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
 
@@ -215,36 +210,36 @@
         coordInput.disabled = randomBox.checked;
       });
 
-      /* True device detection */
+      /* Device detection */
       function isMobile() {
         return (
           "ontouchstart" in window ||
-          navigator.maxTouchPoints > 0 ||
-          navigator.msMaxTouchPoints > 0
+          navigator.maxTouchPoints > 0
         );
       }
 
       const infoIcon = document.getElementById("info-icon");
       const tooltip = document.getElementById("tooltip");
 
-      /* MOBILE: fixed tooltip above icon */
+      /* MOBILE BEHAVIOR */
       infoIcon.addEventListener("click", (e) => {
         if (!isMobile()) return;
+
         e.stopPropagation();
 
         tooltip.classList.toggle("visible");
 
         if (tooltip.classList.contains("visible")) {
-          const iconRect = infoIcon.getBoundingClientRect();
+          const r = infoIcon.getBoundingClientRect();
 
           tooltip.style.position = "fixed";
-          tooltip.style.bottom = `${window.innerHeight - iconRect.top + 20}px`;
-          tooltip.style.left = `${iconRect.left + iconRect.width / 2}px`;
+          tooltip.style.left = `${r.left + r.width / 2}px`;
+          tooltip.style.bottom = `${window.innerHeight - r.top + 20}px`;
           tooltip.style.transform = "translateX(-50%)";
         }
       });
 
-      /* Tap anywhere to dismiss */
+      /* Tap anywhere to close */
       document.addEventListener("click", () => {
         if (!isMobile()) return;
         tooltip.classList.remove("visible");
