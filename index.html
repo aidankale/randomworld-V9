@@ -86,8 +86,12 @@
         pointer-events: auto !important;
       }
 
+      /* DESKTOP tooltip styling */
       .tooltip {
-        position: fixed;
+        position: absolute;
+        bottom: 20px; /* Good original desktop placement */
+        left: 50%;
+        transform: translateX(-50%);
         background: #333;
         color: white;
         padding: 6px 8px;
@@ -98,9 +102,9 @@
         pointer-events: none;
         transition: opacity 0.2s ease;
         z-index: 9999;
-        transform: translateX(-50%);
       }
 
+      /* Hover effect only on desktop */
       @media (hover: hover) and (pointer: fine) {
         .info-icon:hover .tooltip {
           opacity: 1 !important;
@@ -108,6 +112,7 @@
         }
       }
 
+      /* MOBILE VERSION */
       @media (max-width: 768px) {
 
         #map-placeholder {
@@ -150,6 +155,7 @@
           margin-top: -27px;
         }
 
+        /* Mobile tooltip hidden until tapped */
         .tooltip {
           opacity: 0 !important;
           pointer-events: none !important;
@@ -200,6 +206,7 @@
     </div>
 
     <script>
+      /* Grey-out behavior */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
 
@@ -207,6 +214,7 @@
         coordInput.disabled = randomBox.checked;
       });
 
+      /* Mobile detection */
       function isMobile() {
         return (
           "ontouchstart" in window ||
@@ -217,6 +225,7 @@
       const infoIcon = document.getElementById("info-icon");
       const tooltip = document.getElementById("tooltip");
 
+      /* MOBILE TAP HANDLER */
       infoIcon.addEventListener("click", (e) => {
         if (!isMobile()) return;
 
@@ -224,20 +233,24 @@
         tooltip.classList.toggle("visible");
 
         if (tooltip.classList.contains("visible")) {
+
           const r = infoIcon.getBoundingClientRect();
 
+          /* Position centered ABOVE icon—same as Script A but slightly lowered */
           tooltip.style.position = "fixed";
           tooltip.style.left = `${r.left + r.width / 2}px`;
 
-          /* NEW: position ABOVE the icon, not way too high */
-          tooltip.style.top = `${r.top - 10}px`;
+          /* Lowered slightly so it's not too high */
+          tooltip.style.top = `${r.top - 5}px`;
 
           tooltip.style.transform = "translateX(-50%)";
         }
       });
 
+      /* Tap outside to close on mobile */
       document.addEventListener("click", (e) => {
         if (!isMobile()) return;
+
         if (!tooltip.contains(e.target) && !infoIcon.contains(e.target)) {
           tooltip.classList.remove("visible");
         }
