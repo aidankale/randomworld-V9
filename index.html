@@ -10,7 +10,7 @@
         padding: 0;
         font-family: sans-serif;
         line-height: 1.5;
-        overflow-x: hidden; /* Prevent horizontal scrolling */
+        overflow-x: hidden;
       }
 
       #map-placeholder {
@@ -23,13 +23,13 @@
 
       .settings {
         margin: 20px;
-        font-size: 16px; /* desktop body */
+        font-size: 16px;
       }
 
       .settings h2 {
         margin-top: 0;
         margin-bottom: 10px;
-        font-size: 20px; /* desktop header */
+        font-size: 20px;
       }
 
       /* Desktop alignment */
@@ -44,13 +44,13 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin-top: -5px;  /* calibrated desktop vertical alignment */
+        margin-top: -5px;
       }
 
       .coord-row input[type="text"] {
         width: 220px;
         padding: 6px;
-        font-size: 16px; /* desktop textbox text */
+        font-size: 16px;
       }
 
       #start-coordinate[disabled] {
@@ -70,7 +70,7 @@
         margin-right: auto;
       }
 
-      /* Desktop hover-tooltip */
+      /* Info icon */
       .info-icon {
         cursor: pointer;
         font-size: 13px;
@@ -87,24 +87,28 @@
         position: relative;
       }
 
-      /* ---------------------------- */
-      /* TOOLTIP (updated for test)   */
-      /* ---------------------------- */
+      /* Tooltip (desktop placement ONLY) */
       .tooltip {
-        position: fixed !important;   /* FULLY removes it from layout → prevents overflow */
-        z-index: 9999 !important;
-        top: 20px;
-        left: 0;
-
+        position: absolute;
+        bottom: 20px;              /* Above the icon */
+        left: 50%;
+        transform: translateX(-50%);
         background: #333;
         color: white;
         padding: 8px 10px;
         font-size: 12px;
         border-radius: 5px;
-        white-space: nowrap; /* NEVER WRAP */
+        white-space: nowrap;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s ease;
+        z-index: 10000;
+      }
+
+      /* Desktop hover */
+      .info-icon:hover .tooltip {
+        opacity: 1;
+        pointer-events: auto;
       }
 
       /* MOBILE VERSION */
@@ -130,7 +134,7 @@
 
         .coord-row > span {
           flex-basis: 100%;
-          margin-bottom: 0px; /* tightened gap between label + textbox */
+          margin-bottom: 0px;
         }
 
         .textbox-column {
@@ -145,24 +149,20 @@
           font-size: 16px;
         }
 
-        /* Random label vertical adjustment */
+        /* Move Random text upward */
         .coord-row > label:last-child {
           margin-left: 8px;
-          margin-top: -27px; /* you can change this value */
+          margin-top: -27px; /* adjustable */
         }
 
-        .coord-help {
-          width: 100%;
-          font-size: 13px;
-        }
-
-        /* disable desktop hover on mobile */
+        /* Disable hover behavior */
         .info-icon:hover .tooltip {
-          opacity: 0;
-          pointer-events: none;
+          opacity: 0 !important;
+          pointer-events: none !important;
         }
       }
 
+      /* Mobile-visible tooltip */
       .tooltip.visible {
         opacity: 1 !important;
         pointer-events: auto;
@@ -207,6 +207,7 @@
     </div>
 
     <script>
+      /* Grey-out behavior */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
 
@@ -214,6 +215,7 @@
         coordInput.disabled = randomBox.checked;
       });
 
+      /* True device detection */
       function isMobile() {
         return (
           "ontouchstart" in window ||
@@ -225,18 +227,7 @@
       const infoIcon = document.getElementById("info-icon");
       const tooltip = document.getElementById("tooltip");
 
-      function adjustTooltipPosition() {
-        if (!isMobile()) return;
-
-        tooltip.style.transform = "none";
-        const rect = tooltip.getBoundingClientRect();
-        const overflowRight = rect.right - window.innerWidth;
-
-        if (overflowRight > 0) {
-          tooltip.style.transform = `translateX(-${overflowRight + 8}px)`;
-        }
-      }
-
+      /* MOBILE: fixed tooltip above icon */
       infoIcon.addEventListener("click", (e) => {
         if (!isMobile()) return;
         e.stopPropagation();
@@ -244,10 +235,16 @@
         tooltip.classList.toggle("visible");
 
         if (tooltip.classList.contains("visible")) {
-          requestAnimationFrame(adjustTooltipPosition);
+          const iconRect = infoIcon.getBoundingClientRect();
+
+          tooltip.style.position = "fixed";
+          tooltip.style.bottom = `${window.innerHeight - iconRect.top + 20}px`;
+          tooltip.style.left = `${iconRect.left + iconRect.width / 2}px`;
+          tooltip.style.transform = "translateX(-50%)";
         }
       });
 
+      /* Tap anywhere to dismiss */
       document.addEventListener("click", () => {
         if (!isMobile()) return;
         tooltip.classList.remove("visible");
