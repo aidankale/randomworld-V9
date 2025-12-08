@@ -1,479 +1,67 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Travel Roulette - Shrinking Radius Random Coordinate Generator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        font-family: sans-serif;
-        line-height: 1.5;
-        overflow-x: hidden;
-      }
-
-      #map-placeholder {
-        width: 100%;
-        height: 375px;
-        background-color: #e0e0e0;
-        border: 1px solid #ccc;
-        margin-bottom: 20px;
-      }
-
-      .settings {
-        margin: 20px;
-        font-size: 16px;
-      }
-
-      .settings h2 {
-        margin-top: 0;
-        margin-bottom: 10px;
-        font-size: 20px;
-      }
-
-      /* Stack settings checkboxes vertically */
-      .settings > label {
-        display: block;
-        margin-bottom: 8px;
-      }
-
-      .coord-row {
-        margin-top: 15px;
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-      }
-
-      .textbox-column {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-top: -5px;
-      }
-
-      .coord-row input[type="text"] {
-        width: 220px;
-        padding: 6px;
-        font-size: 16px;
-      }
-
-      #start-coordinate[disabled] {
-        background-color: #f0f0f0;
-        color: #888;
-        opacity: 0.7;
-      }
-
-      .coord-help {
-        margin-top: 4px;
-        font-size: 13px;
-        color: #666;
-        text-align: center;
-        width: 220px;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      .info-icon {
-        cursor: pointer;
-        font-size: 13px;
-        color: #555;
-        border-radius: 50%;
-        border: 1px solid #888;
-        width: 14px;
-        height: 14px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        margin-left: 4px;
-        position: relative;
-        pointer-events: auto !important;
-      }
-
-      .tooltip {
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #333;
-        color: white;
-        padding: 6px 8px;
-        font-size: 10px;
-        border-radius: 5px;
-        white-space: nowrap;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s ease;
-        z-index: 9999;
-      }
-
-      @media (hover: hover) and (pointer: fine) {
-        .info-icon:hover .tooltip {
-          opacity: 1 !important;
-          pointer-events: auto !important;
-        }
-      }
-
-      /* -------- STARTING RADIUS BLOCK -------- */
-
-      .radius-block {
-        margin-top: 18px;
-        /* keep it from going full-width visually */
-        max-width: 360px; /* tweak if you want it narrower/wider */
-      }
-
-      .radius-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 8px;
-      }
-
-      .radius-label {
-        white-space: nowrap;
-      }
-
-      .radius-row input[type="text"] {
-        width: 100px; /* smaller than coord textbox */
-        padding: 6px;
-        font-size: 16px;
-      }
-
-      .unit-options label {
-        margin-right: 10px;
-      }
-
-      .slider-wrap {
-        position: relative;
-        height: 30px;
-        width: 260px; /* approximate width to match textbox + Random area */
-        margin-top: 4px;
-      }
-
-      /* slider ticks + line */
-      .slider-ticks {
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 10px;
-        display: flex;
-        justify-content: space-between;
-        pointer-events: none;
-        transform: translateY(-50%);
-      }
-
-      .slider-ticks::before {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: #ccc;
-        transform: translateY(-50%);
-        z-index: 0;
-      }
-
-      .slider-ticks span {
-        width: 1px;
-        height: 10px;
-        background: #999;
-        display: inline-block;
-        z-index: 1;
-      }
-
-      input[type="range"] {
-        width: 100%;
-        height: 30px;
-        -webkit-appearance: none;
-        background: transparent;
-        position: relative;
-        z-index: 2;
-      }
-
-      input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        height: 22px;
-        width: 22px;
-        border-radius: 50%;
-        background: #555;
-        cursor: pointer;
-      }
-
-      /* MOBILE VERSION */
-      @media (max-width: 768px) {
-
-        #map-placeholder {
-          height: 40vh;
-        }
-
-        .settings {
-          font-size: 16px;
-          margin: 15px;
-        }
-
-        .settings h2 {
-          font-size: 20px;
-        }
-
-        .coord-row {
-          flex-wrap: wrap;
-          align-items: center;
-        }
-
-        .coord-row > span {
-          flex-basis: 100%;
-          margin-bottom: 0px;
-        }
-
-        .textbox-column {
-          width: 70%;
-          align-items: flex-start;
-          margin-top: -5px;
-        }
-
-        .coord-row input[type="text"] {
-          width: 70%;
-          padding: 8px;
-          font-size: 16px;
-        }
-
-        .coord-help {
-          width: 70% !important;
-          text-align: center;
-          margin-left: 9px;
-          margin-right: 0;
-        }
-
-        .coord-row > label:last-child {
-          margin-left: -60px;
-          margin-top: -27px;
-        }
-
-        /* mobile layout for radius row: label on its own line */
-        .radius-block {
-          max-width: 100%;
-        }
-
-        .radius-row {
-          flex-wrap: wrap;
-        }
-
-        .radius-label {
-          flex-basis: 100%;
-        }
-
-        .radius-row input[type="text"] {
-          width: 40%;
-        }
-
-        .slider-wrap {
-          width: 70%;
-        }
-
-        .tooltip {
-          opacity: 0 !important;
-          pointer-events: none !important;
-        }
-
-        .tooltip.visible {
-          opacity: 1 !important;
-          pointer-events: auto !important;
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-
-    <div id="map-placeholder"></div>
-
-    <div class="settings">
-      <h2>Settings</h2>
-
-      <label>
-        <input type="checkbox" id="land-restriction">
-        Restrict all coordinates to land
-      </label>
-
-      <label>
-        <input type="checkbox" id="avoid-antarctica">
-        Avoid Antarctica
-      </label>
-
-      <!-- STARTING COORDINATE BLOCK (unchanged) -->
-      <div class="coord-row">
-        <span>Starting coordinate:</span>
-
-        <div class="textbox-column">
-          <input type="text" id="start-coordinate" placeholder="Enter coordinate">
-
-          <div class="coord-help">
-            DMS or decimal 
-            <span class="info-icon" id="info-icon">i
-              <span class="tooltip" id="tooltip">
-                Example: 40.748, -73.985 or 40°44'54"N 73°59'8"W
-              </span>
-            </span>
-          </div>
-        </div>
-
-        <label>
-          <input type="checkbox" id="random-start">
-          Random
-        </label>
-      </div>
-
-      <!-- ⭐ STARTING RADIUS BLOCK (now BELOW starting coordinate) -->
-      <div class="radius-block">
-        <div class="radius-row">
-          <span class="radius-label">Starting radius:</span>
-          <input type="text" id="radius-input" value="100">
-          <div class="unit-options">
-            <label><input type="radio" name="unit" value="miles" checked> Miles</label>
-            <label><input type="radio" name="unit" value="km"> Kilometers</label>
-          </div>
-        </div>
-
-        <div class="slider-wrap">
-          <input type="range" id="radius-slider" min="0" max="100" value="0">
-          <div class="slider-ticks" id="ticks"></div>
-        </div>
-      </div>
-
-    </div>
-
-    <script>
-      /* --- Grey-out behavior (unchanged) --- */
-      const randomBox = document.getElementById("random-start");
-      const coordInput = document.getElementById("start-coordinate");
-
-      randomBox.addEventListener("change", () => {
-        coordInput.disabled = randomBox.checked;
-      });
-
-      /* --- Tooltip behavior (unchanged) --- */
-      function isMobile() {
-        return ("ontouchstart" in window || navigator.maxTouchPoints > 0);
-      }
-
-      const infoIcon = document.getElementById("info-icon");
-      const tooltip = document.getElementById("tooltip");
-
-      infoIcon.addEventListener("click", (e) => {
-        if (!isMobile()) return;
-
-        e.stopPropagation();
-        tooltip.classList.toggle("visible");
-
-        if (tooltip.classList.contains("visible")) {
-          const r = infoIcon.getBoundingClientRect();
-          tooltip.style.position = "fixed";
-          tooltip.style.left = `${r.left + r.width / 2}px`;
-          tooltip.style.bottom = `${window.innerHeight - r.top + 5}px`;
-          tooltip.style.transform = "translateX(-50%)`;
-        }
-      });
-
-      document.addEventListener("click", (e) => {
-        if (!isMobile()) return;
-
-        if (!tooltip.contains(e.target) && !infoIcon.contains(e.target)) {
-          tooltip.classList.remove("visible");
-        }
-      });
-
-      /* ---------------------------------------------------------
-         SLIDER LOGIC — SNAP ON DRAG, SMOOTH ON TYPE
-      --------------------------------------------------------- */
-
-      const radiusInput = document.getElementById("radius-input");
-      const slider = document.getElementById("radius-slider");
-      const unitRadios = document.getElementsByName("unit");
-      const ticksBox = document.getElementById("ticks");
-
-      const snapMiles = [1,2,5,10,20,50,100,200,300,500,1000,2000,3000,5000,8000,12000];
-      const snapKm    = [1,2,5,10,20,50,100,200,300,500,1000,2000,3000,5000,8000,20000];
-
-      function getSnaps() {
-        return unitRadios[0].checked ? snapMiles : snapKm;
-      }
-
-      function getMax() {
-        const snaps = getSnaps();
-        return snaps[snaps.length - 1];
-      }
-
-      /* Draw ticks */
-      function drawTicks() {
-        ticksBox.innerHTML = "";
-        let snaps = getSnaps();
-        snaps.forEach(() => {
-          const t = document.createElement("span");
-          ticksBox.appendChild(t);
-        });
-      }
-
-      /* Convert slider % -> snapped value */
-      function snapFromSlider(sliderVal) {
-        let max = getMax();
-        let pct = sliderVal / 100;
-        let raw = pct * max;
-
-        let snaps = getSnaps();
-        let nearest = snaps.reduce((a, b) =>
-          Math.abs(b - raw) < Math.abs(a - raw) ? b : a
-        );
-        return nearest;
-      }
-
-      /* Convert value -> slider % */
-      function valueToSlider(val) {
-        let max = getMax();
-        return (val / max) * 100;
-      }
-
-      /* DRAG: snap value AND move thumb to snap */
-      slider.addEventListener("input", () => {
-        const snapped = snapFromSlider(parseFloat(slider.value));
-        radiusInput.value = snapped;
-        slider.value = valueToSlider(snapped);  // thumb jumps to tick
-      });
-
-      /* TYPE: no snapping, just clamp and move slider smoothly */
-      radiusInput.addEventListener("input", () => {
-        let n = parseInt(radiusInput.value, 10);
-        if (isNaN(n)) return;
-        n = Math.max(1, Math.min(n, getMax()));
-        radiusInput.value = n;
-        slider.value = valueToSlider(n);
-      });
-
-      /* Switch units (Miles/Km) */
-      unitRadios.forEach(r => {
-        r.addEventListener("change", () => {
-          drawTicks();
-          let n = parseInt(radiusInput.value, 10);
-          if (isNaN(n)) n = 1;
-          n = Math.min(n, getMax());
-          radiusInput.value = n;
-          slider.value = valueToSlider(n);
-        });
-      });
-
-      /* INIT */
-      drawTicks();
-      (function initSlider() {
-        let n = parseInt(radiusInput.value, 10);
-        if (isNaN(n)) n = 100;
-        n = Math.max(1, Math.min(n, getMax()));
-        radiusInput.value = n;
-        slider.value = valueToSlider(n);
-      })();
-    </script>
-
-  </body>
-</html>
+<script>
+/* SNAP LISTS */
+const snapMiles = [1,2,5,10,20,50,100,200,300,500,1000,2000,3000,5000,8000,12000];
+const snapKm    = [1,2,5,10,20,50,100,200,300,500,1000,2000,3000,5000,8000,20000];
+
+function getSnaps() {
+  return document.querySelector("input[name='unit']:checked").value === "miles"
+    ? snapMiles
+    : snapKm;
+}
+
+function getMax() {
+  const snaps = getSnaps();
+  return snaps[snaps.length - 1];
+}
+
+function valueToSlider(val) {
+  return (val / getMax()) * 100;
+}
+
+function sliderToSnapped(sliderVal) {
+  const max = getMax();
+  const raw = (sliderVal / 100) * max;
+  const snaps = getSnaps();
+  return snaps.reduce((a,b) => Math.abs(b-raw) < Math.abs(a-raw) ? b : a);
+}
+
+/* ELEMENTS */
+const radiusInput = document.getElementById("radius-input");
+const slider = document.getElementById("radius-slider");
+
+/* --- Dragging the slider snaps the VALUE --- */
+slider.addEventListener("input", () => {
+  const snapped = sliderToSnapped(parseFloat(slider.value));
+  radiusInput.value = snapped;
+  slider.value = valueToSlider(snapped);
+});
+
+/* --- Typing DOES NOT SNAP --- */
+radiusInput.addEventListener("input", () => {
+  let n = parseInt(radiusInput.value, 10);
+  if (isNaN(n)) return;
+
+  n = Math.max(1, Math.min(n, getMax()));  // clamp
+  radiusInput.value = n;
+  slider.value = valueToSlider(n);
+});
+
+/* --- Switching units keeps same numeric value if possible --- */
+document.querySelectorAll("input[name='unit']").forEach(r => {
+  r.addEventListener("change", () => {
+    let n = parseInt(radiusInput.value, 10);
+    if (isNaN(n)) n = 1;
+    n = Math.min(n, getMax());
+    radiusInput.value = n;
+    slider.value = valueToSlider(n);
+  });
+});
+
+/* INITIALIZE */
+(function init() {
+  let n = parseInt(radiusInput.value, 10);
+  if (isNaN(n)) n = 100;
+  radiusInput.value = n;
+  slider.value = valueToSlider(n);
+})();
+</script>
