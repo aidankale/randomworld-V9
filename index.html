@@ -116,6 +116,50 @@
         }
       }
 
+      /* ⭐ STARTING RADIUS BLOCK (DESKTOP BASE) */
+      .radius-block {
+        margin-top: 20px;
+      }
+
+      .radius-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .radius-label {
+        white-space: nowrap;
+      }
+
+      .radius-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      #radius-input {
+        width: 80px;
+        padding: 4px 6px;
+        font-size: 16px;
+      }
+
+      .radius-unit-option {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 14px;
+      }
+
+      .radius-slider-row {
+        margin-top: 4px;
+      }
+
+      #radius-slider {
+        width: 100%;
+      }
+
       /* MOBILE VERSION */
       @media (max-width: 768px) {
 
@@ -175,6 +219,32 @@
           opacity: 1 !important;
           pointer-events: auto !important;
         }
+
+        /* 📱 Mobile layout for starting radius */
+        .radius-row {
+          flex-wrap: wrap;
+          align-items: center;
+        }
+
+        .radius-label {
+          flex-basis: 100%;
+          margin-bottom: 4px;
+        }
+
+        .radius-controls {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        #radius-input {
+          width: 30%;
+        }
+
+        .radius-slider-row {
+          margin-top: 8px;
+        }
       }
     </style>
   </head>
@@ -191,7 +261,6 @@
         Restrict all coordinates to land
       </label>
 
-      <!-- ⭐ NOW THIS STACKS VERTICALLY UNDER THE FIRST CHECKBOX -->
       <label>
         <input type="checkbox" id="avoid-antarctica">
         Avoid Antarctica
@@ -219,9 +288,40 @@
         </label>
       </div>
 
+      <!-- ⭐ NEW: Starting radius block -->
+      <div class="radius-block">
+        <div class="radius-row">
+          <span class="radius-label">Starting radius:</span>
+          <div class="radius-controls">
+            <input
+              type="text"
+              id="radius-input"
+              inputmode="numeric"
+              pattern="\d*"
+              placeholder="300"
+            >
+            <label class="radius-unit-option">
+              <input type="radio" name="radius-unit" value="mi" id="radius-unit-mi" checked>
+              Miles
+            </label>
+            <label class="radius-unit-option">
+              <input type="radio" name="radius-unit" value="km" id="radius-unit-km">
+              Kilometers
+            </label>
+          </div>
+        </div>
+
+        <div class="radius-slider-row">
+          <input type="range" id="radius-slider">
+        </div>
+      </div>
+
     </div>
 
     <script>
+      /* ------------------------
+         Existing: grey-out behavior
+      ------------------------- */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
 
@@ -229,6 +329,9 @@
         coordInput.disabled = randomBox.checked;
       });
 
+      /* ------------------------
+         Existing: mobile detection
+      ------------------------- */
       function isMobile() {
         return ("ontouchstart" in window || navigator.maxTouchPoints > 0);
       }
@@ -258,6 +361,125 @@
           tooltip.classList.remove("visible");
         }
       });
+
+      /* ------------------------
+         NEW: Starting radius logic
+      ------------------------- */
+
+      // Non-linear snap lists (discrete values) for slider
+      const SNAP_MILES = [
+        1, 2, 5, 10, 20, 30, 50, 75,
+        100, 150, 200, 300, 400, 500, 750,
+        1000, 1500, 2000, 3000, 4000, 6000, 8000,
+        10000, 12000
+      ];
+
+      const SNAP_KM = [
+        1, 2, 5, 10, 20, 30, 50, 75,
+        100, 150, 200, 300, 400, 500, 750,
+        1000, 1500, 2000, 3000, 4000, 6000, 8000,
+        10000, 12000, 15000, 20000
+      ];
+
+      const radiusInput = document.getElementById("radius-input");
+      const radiusSlider = document.getElementById("radius-slider");
+      const unitMiles   = document.getElementById("radius-unit-mi");
+      const unitKm      = document.getElementById("radius-unit-km");
+
+      let currentUnit = "mi"; // default
+
+      function getCurrentSnapList() {
+        return currentUnit === "mi" ? SNAP_MILES : SNAP_KM;
+      }
+
+      function findNearestIndex(arr, value) {
+        let bestIdx = 0;
+        let bestDiff = Math.abs(arr[0] - value);
+        for (let i = 1; i < arr.length; i++) {
+          const diff = Math.abs(arr[i] - value);
+          if (diff < bestDiff) {
+            bestDiff = diff;
+            bestIdx = i;
+          }
+        }
+        return bestIdx;
+      }
+
+      function initRadiusControls() {
+        const snaps = getCurrentSnapList();
+        radiusSlider.min = 0;
+        radiusSlider.max = snaps.length - 1;
+        radiusSlider.step = 1;
+
+        // Default starting radius: 300 (in miles)
+        let defaultValue = 300;
+        const idx = findNearestIndex(snaps, defaultValue);
+        radiusSlider.value = idx;
+        radiusInput.value = snaps[idx];
+      }
+
+      // Slider → Textbox
+      radiusSlider.addEventListener("input", () => {
+        const snaps = getCurrentSnapList();
+        const idx = parseInt(radiusSlider.value, 10);
+        const val = snaps[idx];
+        radiusInput.value = val;
+      });
+
+      // Textbox → Slider (with rounding & snapping)
+      function handleRadiusInputChange() {
+        const snaps = getCurrentSnapList();
+        let raw = radiusInput.value.replace(/[^0-9]/g, "");
+
+        if (raw === "") {
+          // Don't force a value if user clears; they'll move slider or type again
+          return;
+        }
+
+        let num = Math.round(Number(raw));
+        if (Number.isNaN(num)) {
+          num = snaps[0];
+        }
+
+        // Clamp to allowed min/max
+        if (num < snaps[0]) num = snaps[0];
+        if (num > snaps[snaps.length - 1]) num = snaps[snaps.length - 1];
+
+        const idx = findNearestIndex(snaps, num);
+        radiusSlider.value = idx;
+        radiusInput.value = snaps[idx]; // snap to discrete value
+      }
+
+      radiusInput.addEventListener("change", handleRadiusInputChange);
+      radiusInput.addEventListener("blur", handleRadiusInputChange);
+
+      // Unit switching (Option 3: keep number the same, no conversion)
+      unitMiles.addEventListener("change", () => {
+        if (!unitMiles.checked) return;
+        currentUnit = "mi";
+
+        const snaps = getCurrentSnapList();
+        radiusSlider.min = 0;
+        radiusSlider.max = snaps.length - 1;
+
+        // Keep same numeric value, but snap in miles list
+        handleRadiusInputChange();
+      });
+
+      unitKm.addEventListener("change", () => {
+        if (!unitKm.checked) return;
+        currentUnit = "km";
+
+        const snaps = getCurrentSnapList();
+        radiusSlider.min = 0;
+        radiusSlider.max = snaps.length - 1;
+
+        // Keep same numeric value, but snap in km list
+        handleRadiusInputChange();
+      });
+
+      // Initialize on load
+      initRadiusControls();
     </script>
 
   </body>
