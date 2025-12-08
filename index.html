@@ -6,13 +6,10 @@
 
     <style>
       html, body {
-        max-width: 100%;
-        overflow-x: hidden; /* Prevent page expansion */
-      }
-
-      body {
         margin: 0;
         padding: 0;
+        max-width: 100%;
+        overflow-x: hidden;
         font-family: sans-serif;
         line-height: 1.5;
       }
@@ -69,46 +66,6 @@
         text-align: center;
         width: 220px;
         display: block;
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      /* -------------------------------------- */
-      /* CORRECTED TOOLTIP CONTAINER            */
-      /* -------------------------------------- */
-      .tooltip-container {
-        position: relative;
-        display: inline-block;
-
-        /* Hide only RIGHT overflow */
-        overflow-x: clip;
-        overflow-y: visible;
-
-        /* Allow tooltip to be fully visible leftward */
-        max-width: 100%;
-      }
-
-      /* -------------------------------------- */
-      /* TOOLTIP ITSELF                         */
-      /* -------------------------------------- */
-      .tooltip {
-        position: absolute;
-        top: 20px;
-
-        /* EXPAND LEFT */
-        right: 0;
-        left: auto;
-
-        background: #333;
-        color: white;
-        padding: 8px 10px;
-        font-size: 12px;
-        border-radius: 5px;
-        white-space: nowrap;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s ease;
-        z-index: 10;
       }
 
       .info-icon {
@@ -127,16 +84,30 @@
         position: relative;
       }
 
-      .info-icon:hover .tooltip {
+      .info-icon:hover .tooltip:not(.visible-mobile) {
         opacity: 1;
         pointer-events: auto;
       }
 
-      /* -------------------------------------- */
-      /* MOBILE VERSION                          */
-      /* -------------------------------------- */
-      @media (max-width: 768px) {
+      /* Tooltip */
+      .tooltip {
+        position: absolute;
+        top: 20px;
+        left: 0;
+        background: #333;
+        color: white;
+        padding: 8px 10px;
+        font-size: 12px;
+        border-radius: 5px;
+        white-space: nowrap; /* no wrapping */
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        z-index: 9999;
+      }
 
+      /* MOBILE VERSION */
+      @media (max-width: 768px) {
         #map-placeholder {
           height: 40vh;
         }
@@ -172,7 +143,6 @@
           font-size: 16px;
         }
 
-        /* Adjust position of Random on mobile */
         .coord-row > label:last-child {
           margin-left: 8px;
           margin-top: -27px;
@@ -183,6 +153,7 @@
           font-size: 13px;
         }
 
+        /* Disable hover on mobile */
         .info-icon:hover .tooltip {
           opacity: 0;
           pointer-events: none;
@@ -192,6 +163,25 @@
       .tooltip.visible {
         opacity: 1 !important;
         pointer-events: auto;
+      }
+
+      /* -------------------------------------------------------
+         DEBUG MODE — Forces tooltip to appear visibly no matter what
+         ------------------------------------------------------- */
+      .tooltip {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        background: rgba(0,150,255,0.7) !important;
+        outline: 2px solid red !important;
+      }
+
+      .info-icon {
+        outline: 2px solid lime;
+      }
+
+      /* Ensure no clipping */
+      body, html {
+        overflow: visible !important;
       }
     </style>
   </head>
@@ -209,7 +199,6 @@
       </label>
 
       <div class="coord-row">
-
         <span>Starting coordinate:</span>
 
         <div class="textbox-column">
@@ -218,10 +207,8 @@
           <div class="coord-help">
             DMS or decimal 
             <span class="info-icon" id="info-icon">i
-              <span class="tooltip-container">
-                <span class="tooltip" id="tooltip">
-                  Example: 40.748, -73.985 or 40°44'54"N 73°59'8"W
-                </span>
+              <span class="tooltip" id="tooltip">
+                Example: 40.748, -73.985 or 40°44'54"N 73°59'8"W
               </span>
             </span>
           </div>
@@ -231,8 +218,8 @@
           <input type="checkbox" id="random-start">
           Random
         </label>
-
       </div>
+
     </div>
 
     <script>
@@ -254,28 +241,10 @@
       const infoIcon = document.getElementById("info-icon");
       const tooltip = document.getElementById("tooltip");
 
-      function adjustTooltipPosition() {
-        if (!isMobile()) return;
-
-        tooltip.style.transform = "none";
-
-        const rect = tooltip.getBoundingClientRect();
-        const overflowLeft = rect.left;
-
-        if (overflowLeft < 0) {
-          tooltip.style.transform = `translateX(${-overflowLeft + 8}px)`;
-        }
-      }
-
       infoIcon.addEventListener("click", (e) => {
         if (!isMobile()) return;
         e.stopPropagation();
-
         tooltip.classList.toggle("visible");
-
-        if (tooltip.classList.contains("visible")) {
-          requestAnimationFrame(adjustTooltipPosition);
-        }
       });
 
       document.addEventListener("click", () => {
