@@ -10,6 +10,7 @@
         padding: 0;
         font-family: sans-serif;
         line-height: 1.5;
+        overflow-x: hidden; /* Prevent horizontal scrolling */
       }
 
       #map-placeholder {
@@ -22,16 +23,16 @@
 
       .settings {
         margin: 20px;
-        font-size: 16px;
+        font-size: 16px; /* desktop body */
       }
 
       .settings h2 {
         margin-top: 0;
         margin-bottom: 10px;
-        font-size: 20px;
+        font-size: 20px; /* desktop header */
       }
 
-      /* Perfect vertical alignment (desktop) */
+      /* Desktop alignment */
       .coord-row {
         margin-top: 15px;
         display: flex;
@@ -43,16 +44,15 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin-top: -5px;     /* your chosen offset on desktop */
+        margin-top: -5px;  /* your calibrated perfect vertical alignment */
       }
 
       .coord-row input[type="text"] {
         width: 220px;
         padding: 6px;
-        font-size: 16px;
+        font-size: 16px; /* desktop textbox text */
       }
 
-      /* Grey-out appearance when disabled */
       #start-coordinate[disabled] {
         background-color: #f0f0f0;
         color: #888;
@@ -65,11 +65,12 @@
         color: #666;
         text-align: center;
         width: 220px;
+        display: block;
         margin-left: auto;
         margin-right: auto;
-        display: block;
       }
 
+      /* Desktop hover-tooltip */
       .info-icon {
         cursor: pointer;
         font-size: 13px;
@@ -100,29 +101,31 @@
         padding: 8px 10px;
         font-size: 12px;
         border-radius: 5px;
-        white-space: nowrap;
+        white-space: nowrap; /* NEVER WRAP */
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s ease;
         z-index: 10;
       }
 
-      /* visible class for mobile tap */
-      .tooltip.visible {
-        opacity: 1;
-        pointer-events: auto;
-      }
-
+      /* MOBILE VERSION */
       @media (max-width: 768px) {
-        #map-placeholder { height: 40vh; }
+        #map-placeholder {
+          height: 40vh;
+        }
 
-        .settings { font-size: 20px; margin: 15px; }
-        .settings h2 { font-size: 22px; }
+        /* BODY TEXT: proportional +2 boost */
+        .settings {
+          font-size: 16px;
+          margin: 15px;
+        }
 
-        /* Mobile layout:
-           - "Starting coordinate:" on its own line
-           - Textbox + Random on next line, side by side
-        */
+        /* HEADER TEXT: proportional +2 boost */
+        .settings h2 {
+          font-size: 20px;
+        }
+
+        /* MOBILE TEXTBOX + RANDOM POSITIONING */
         .coord-row {
           flex-wrap: wrap;
           align-items: center;
@@ -135,24 +138,39 @@
 
         .textbox-column {
           width: 70%;
-          margin-top: 0;        /* no vertical hack needed on mobile */
           align-items: flex-start;
+          margin-top: 0;
         }
 
+        /* TEXTBOX FONT SIZE: proportional +2 → 18 */
         .coord-row input[type="text"] {
           width: 100%;
-          font-size: 18px;
           padding: 8px;
+          font-size: 18px;
         }
 
+        /* Random next to textbox */
         .coord-row > label:last-child {
           margin-left: 8px;
         }
 
+        /* Helper text: proportional +2 → 15 */
         .coord-help {
           width: 100%;
-          font-size: 16px;
+          font-size: 15px;
         }
+
+        /* Disable desktop hover rule on mobile (JS handles tap) */
+        .info-icon:hover .tooltip {
+          opacity: 0;
+          pointer-events: none;
+        }
+      }
+
+      /* Tooltip visible class (mobile) */
+      .tooltip.visible {
+        opacity: 1 !important;
+        pointer-events: auto;
       }
     </style>
   </head>
@@ -177,8 +195,8 @@
 
           <div class="coord-help">
             DMS or decimal 
-            <span class="info-icon" tabindex="0">i
-              <span class="tooltip">
+            <span class="info-icon" id="info-icon">i
+              <span class="tooltip" id="tooltip">
                 Example: 40.748, -73.985 or 40°44'54"N 73°59'8"W
               </span>
             </span>
@@ -193,8 +211,10 @@
 
     </div>
 
-    <!-- Behavior: random checkbox + tooltip -->
     <script>
+      /* ----------------------------
+         GREY-OUT BEHAVIOR
+      ---------------------------- */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
 
@@ -202,17 +222,52 @@
         coordInput.disabled = randomBox.checked;
       });
 
-      // Tooltip tap/click support for mobile
-      const infoIcon = document.querySelector(".info-icon");
-      const tooltip = infoIcon.querySelector(".tooltip");
+      /* ----------------------------
+         TRUE MOBILE DETECTION
+      ---------------------------- */
+      function isMobile() {
+        return (
+          "ontouchstart" in window ||
+          navigator.maxTouchPoints > 0 ||
+          navigator.msMaxTouchPoints > 0
+        );
+      }
 
+      const infoIcon = document.getElementById("info-icon");
+      const tooltip = document.getElementById("tooltip");
+
+      /* ----------------------------
+         MOBILE TOOLTIP POSITION FIX
+      ---------------------------- */
+      function adjustTooltipPosition() {
+        if (!isMobile()) return;
+
+        tooltip.style.transform = "none"; // reset
+
+        const rect = tooltip.getBoundingClientRect();
+        const overflowRight = rect.right - window.innerWidth;
+
+        if (overflowRight > 0) {
+          tooltip.style.transform = `translateX(-${overflowRight + 8}px)`; 
+        }
+      }
+
+      /* ----------------------------
+         MOBILE TAP TOGGLE
+      ---------------------------- */
       infoIcon.addEventListener("click", (e) => {
+        if (!isMobile()) return;
         e.stopPropagation();
+
         tooltip.classList.toggle("visible");
+
+        if (tooltip.classList.contains("visible")) {
+          requestAnimationFrame(adjustTooltipPosition);
+        }
       });
 
-      // Close tooltip when clicking elsewhere
       document.addEventListener("click", () => {
+        if (!isMobile()) return;
         tooltip.classList.remove("visible");
       });
     </script>
