@@ -108,24 +108,23 @@
         z-index: 10;
       }
 
-      /* MOBILE VERSION */
+      /* -----------------------------------
+         MOBILE VERSION (touch devices)
+      ----------------------------------- */
       @media (max-width: 768px) {
         #map-placeholder {
           height: 40vh;
         }
 
-        /* BODY TEXT: desktop 16 → mobile 14 +2 final boost = 16 */
         .settings {
           font-size: 16px;
           margin: 15px;
         }
 
-        /* HEADER TEXT: desktop 20 → proportionally reduced → +2 boost = 20 */
         .settings h2 {
           font-size: 20px;
         }
 
-        /* MOBILE TEXTBOX + RANDOM POSITIONING */
         .coord-row {
           flex-wrap: wrap;
           align-items: center;
@@ -142,28 +141,34 @@
           margin-top: 0;
         }
 
-        /* TEXTBOX FONT SIZE: desktop 16 → proportional → +2 → 18 */
         .coord-row input[type="text"] {
           width: 100%;
           padding: 8px;
           font-size: 18px;
         }
 
-        /* RANDOM checkbox next to textbox */
         .coord-row > label:last-child {
           margin-left: 8px;
         }
 
-        /* Helper text: desktop 13 → proportional → +2 → 15 */
         .coord-help {
           width: 100%;
           font-size: 15px;
         }
 
-        /* Disable hover on mobile */
+        /* Remove hover on mobile */
         .info-icon:hover .tooltip {
           opacity: 0;
           pointer-events: none;
+        }
+
+        /* FIX: prevent tooltip from causing horizontal scrolling */
+        .coord-help .tooltip {
+          left: auto !important;
+          right: 0;              /* anchor tooltip inside screen */
+          max-width: 90vw;       /* NEVER exceed viewport width */
+          white-space: normal;   /* allow wrapping */
+          word-break: break-word;
         }
       }
 
@@ -223,10 +228,10 @@
       });
 
       /* ----------------------------
-         TOOLTIP LOGIC (Desktop hover / Mobile tap)
+         TOOLTIP LOGIC
+         Desktop = hover
+         Mobile = tap toggle
       ---------------------------- */
-
-      // TRUE mobile detection — not based on width
       function isMobile() {
         return (
           "ontouchstart" in window ||
@@ -238,14 +243,12 @@
       const infoIcon = document.getElementById("info-icon");
       const tooltip = infoIcon.querySelector(".tooltip");
 
-      // Mobile tap toggle
       infoIcon.addEventListener("click", (e) => {
-        if (!isMobile()) return; // desktop uses hover only
+        if (!isMobile()) return; 
         e.stopPropagation();
         tooltip.classList.toggle("visible");
       });
 
-      // Tap anywhere else closes tooltip (mobile only)
       document.addEventListener("click", () => {
         if (!isMobile()) return;
         tooltip.classList.remove("visible");
