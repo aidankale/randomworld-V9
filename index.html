@@ -5,16 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
-      html, body {
+      body {
         margin: 0;
         padding: 0;
-        max-width: 100%;
-        overflow-x: hidden;
         font-family: sans-serif;
         line-height: 1.5;
+        overflow-x: hidden; /* Prevent horizontal scrolling */
       }
 
-      /* --- MAP BOX --- */
       #map-placeholder {
         width: 100%;
         height: 375px;
@@ -23,19 +21,18 @@
         margin-bottom: 20px;
       }
 
-      /* --- SETTINGS --- */
       .settings {
         margin: 20px;
-        font-size: 16px;
+        font-size: 16px; /* desktop body */
       }
 
       .settings h2 {
         margin-top: 0;
         margin-bottom: 10px;
-        font-size: 20px;
+        font-size: 20px; /* desktop header */
       }
 
-      /* --- DESKTOP COORD ROW --- */
+      /* Desktop alignment */
       .coord-row {
         margin-top: 15px;
         display: flex;
@@ -47,13 +44,13 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin-top: -5px;
+        margin-top: -5px;  /* calibrated desktop vertical alignment */
       }
 
       .coord-row input[type="text"] {
         width: 220px;
         padding: 6px;
-        font-size: 16px;
+        font-size: 16px; /* desktop textbox text */
       }
 
       #start-coordinate[disabled] {
@@ -68,9 +65,12 @@
         color: #666;
         text-align: center;
         width: 220px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
       }
 
-      /* --- INFO ICON --- */
+      /* Desktop hover-tooltip */
       .info-icon {
         cursor: pointer;
         font-size: 13px;
@@ -87,30 +87,29 @@
         position: relative;
       }
 
-      /* --- TOOLTIP --- */
+      /* ---------------------------- */
+      /* TOOLTIP (updated for test)   */
+      /* ---------------------------- */
       .tooltip {
-        position: absolute;
-        top: 20px;      /* ✔ directly below the "i" → Option A */
-        left: 0;        /* anchor left edge under the icon */
+        position: fixed !important;   /* FULLY removes it from layout → prevents overflow */
+        z-index: 9999 !important;
+        top: 20px;
+        left: 0;
+
         background: #333;
         color: white;
         padding: 8px 10px;
         font-size: 12px;
         border-radius: 5px;
-        white-space: nowrap; /* ✔ never wrap */
+        white-space: nowrap; /* NEVER WRAP */
         opacity: 0;
         pointer-events: none;
-        transition: opacity 0.15s ease;
-        z-index: 9999;  /* ensure on top */
+        transition: opacity 0.2s ease;
       }
 
-      .info-icon:hover .tooltip {
-        opacity: 1;
-        pointer-events: auto;
-      }
-
-      /* --- MOBILE VERSION --- */
+      /* MOBILE VERSION */
       @media (max-width: 768px) {
+
         #map-placeholder {
           height: 40vh;
         }
@@ -131,7 +130,7 @@
 
         .coord-row > span {
           flex-basis: 100%;
-          margin-bottom: 0px;
+          margin-bottom: 0px; /* tightened gap between label + textbox */
         }
 
         .textbox-column {
@@ -146,9 +145,10 @@
           font-size: 16px;
         }
 
+        /* Random label vertical adjustment */
         .coord-row > label:last-child {
           margin-left: 8px;
-          margin-top: -27px; /* your tunable value */
+          margin-top: -27px; /* you can change this value */
         }
 
         .coord-help {
@@ -156,14 +156,13 @@
           font-size: 13px;
         }
 
-        /* disable hover effect on mobile */
+        /* disable desktop hover on mobile */
         .info-icon:hover .tooltip {
           opacity: 0;
           pointer-events: none;
         }
       }
 
-      /* Mobile toggle class */
       .tooltip.visible {
         opacity: 1 !important;
         pointer-events: auto;
@@ -208,9 +207,6 @@
     </div>
 
     <script>
-      /* ----------------------------
-         ENABLE/DISABLE COORD INPUT
-      ---------------------------- */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
 
@@ -218,27 +214,22 @@
         coordInput.disabled = randomBox.checked;
       });
 
-      /* ----------------------------
-         MOBILE DETECTION
-      ---------------------------- */
       function isMobile() {
         return (
           "ontouchstart" in window ||
-          navigator.maxTouchPoints > 0
+          navigator.maxTouchPoints > 0 ||
+          navigator.msMaxTouchPoints > 0
         );
       }
 
       const infoIcon = document.getElementById("info-icon");
       const tooltip = document.getElementById("tooltip");
 
-      /* ------------------------------------------------
-         AUTO-CORRECT TOOLTIP POSITION IF OFF-SCREEN
-      ------------------------------------------------ */
-      function fixTooltipPosition() {
+      function adjustTooltipPosition() {
+        if (!isMobile()) return;
 
-        tooltip.style.transform = "none";  // reset any previous shift
+        tooltip.style.transform = "none";
         const rect = tooltip.getBoundingClientRect();
-
         const overflowRight = rect.right - window.innerWidth;
 
         if (overflowRight > 0) {
@@ -246,13 +237,6 @@
         }
       }
 
-      /* ----------------------------
-         DESKTOP HOVER HANDLES IT
-      ---------------------------- */
-
-      /* ----------------------------
-         MOBILE TAP BEHAVIOR
-      ---------------------------- */
       infoIcon.addEventListener("click", (e) => {
         if (!isMobile()) return;
         e.stopPropagation();
@@ -260,7 +244,7 @@
         tooltip.classList.toggle("visible");
 
         if (tooltip.classList.contains("visible")) {
-          requestAnimationFrame(fixTooltipPosition);
+          requestAnimationFrame(adjustTooltipPosition);
         }
       });
 
