@@ -69,9 +69,6 @@
         color: #666;
         text-align: center;
         width: 220px;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
       }
 
       .info-icon {
@@ -88,7 +85,6 @@
         font-weight: bold;
         margin-left: 4px;
         position: relative;
-        pointer-events: auto !important;
       }
 
       .tooltip {
@@ -111,31 +107,26 @@
       @media (hover: hover) and (pointer: fine) {
         .info-icon:hover .tooltip {
           opacity: 1 !important;
-          pointer-events: auto !important;
         }
       }
 
-      /* ⭐ Starting radius UI block */
+      /* -------------------------
+         STARTING RADIUS LAYOUT
+      --------------------------*/
+
       .radius-block {
-        margin-top: 20px;
+        margin-top: 22px;
       }
 
       .radius-row {
         display: flex;
         align-items: center;
-        gap: 8px;
-        margin-bottom: 6px;
-      }
-
-      .radius-controls {
-        display: flex;
-        align-items: center;
-        gap: 4px;   /* mi/km closer */
-        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 8px;
       }
 
       #radius-input {
-        width: 70px;   /* shorter textbox */
+        width: 70px;     /* shortened textbox */
         padding: 4px 6px;
         font-size: 16px;
       }
@@ -143,31 +134,32 @@
       .radius-unit-option {
         display: flex;
         align-items: center;
-        gap: 3px;
+        gap: 3px;        /* bring mi & km closer */
+        font-size: 14px;
+      }
+
+      .radius-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
 
       .radius-slider-row {
-        width: max-content; /* matches width of controls above */
+        width: 100%; /* match width of radius controls row */
       }
 
-      #radius-slider {
+      .radius-slider-row input[type="range"] {
         width: 100%;
       }
 
       /* MOBILE VERSION */
       @media (max-width: 768px) {
-
         #map-placeholder {
           height: 40vh;
         }
 
         .settings {
-          font-size: 16px;
           margin: 15px;
-        }
-
-        .settings h2 {
-          font-size: 20px;
         }
 
         .coord-row {
@@ -175,14 +167,9 @@
           align-items: center;
         }
 
-        .coord-row > span {
-          flex-basis: 100%;
-        }
-
         .textbox-column {
           width: 70%;
           align-items: flex-start;
-          margin-top: -5px;
         }
 
         .coord-row input[type="text"] {
@@ -202,9 +189,12 @@
 
         .tooltip {
           opacity: 0 !important;
+          pointer-events: none !important;
         }
+
         .tooltip.visible {
           opacity: 1 !important;
+          pointer-events: auto !important;
         }
 
         .radius-row {
@@ -213,6 +203,15 @@
 
         .radius-label {
           flex-basis: 100%;
+          margin-bottom: 4px;
+        }
+
+        #radius-input {
+          width: 30%;
+        }
+
+        .radius-slider-row {
+          margin-top: 8px;
         }
       }
     </style>
@@ -240,7 +239,6 @@
 
         <div class="textbox-column">
           <input type="text" id="start-coordinate" placeholder="Enter coordinate">
-
           <div class="coord-help">
             DMS or decimal 
             <span class="info-icon" id="info-icon">i
@@ -252,8 +250,7 @@
         </div>
 
         <label>
-          <input type="checkbox" id="random-start">
-          Random
+          <input type="checkbox" id="random-start"> Random
         </label>
       </div>
 
@@ -262,20 +259,12 @@
         <div class="radius-row">
           <span class="radius-label">Starting radius:</span>
           <div class="radius-controls">
-            <input
-              type="text"
-              id="radius-input"
-              inputmode="numeric"
-              pattern="\d*"
-              placeholder="300"
-            >
+            <input type="text" id="radius-input" inputmode="numeric" pattern="\d*" placeholder="300">
             <label class="radius-unit-option">
-              <input type="radio" name="radius-unit" value="mi" id="radius-unit-mi" checked>
-              mi
+              <input type="radio" name="radius-unit" value="mi" id="radius-unit-mi" checked> mi
             </label>
             <label class="radius-unit-option">
-              <input type="radio" name="radius-unit" value="km" id="radius-unit-km">
-              km
+              <input type="radio" name="radius-unit" value="km" id="radius-unit-km"> km
             </label>
           </div>
         </div>
@@ -284,17 +273,17 @@
           <input type="range" id="radius-slider">
         </div>
       </div>
-
     </div>
 
     <script>
-      /* Existing mobile/tooltip logic */
+      /* Grey-out random */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
       randomBox.addEventListener("change", () => {
         coordInput.disabled = randomBox.checked;
       });
 
+      /* Tooltip */
       function isMobile() {
         return ("ontouchstart" in window || navigator.maxTouchPoints > 0);
       }
@@ -302,19 +291,13 @@
       const infoIcon = document.getElementById("info-icon");
       const tooltip = document.getElementById("tooltip");
 
-      infoIcon.addEventListener("click", (e) => {
+      infoIcon.addEventListener("click", e => {
         if (!isMobile()) return;
         e.stopPropagation();
         tooltip.classList.toggle("visible");
-        if (tooltip.classList.contains("visible")) {
-          const r = infoIcon.getBoundingClientRect();
-          tooltip.style.position = "fixed";
-          tooltip.style.left = `${r.left + r.width / 2}px`;
-          tooltip.style.bottom = `${window.innerHeight - r.top + 5}px`;
-        }
       });
 
-      document.addEventListener("click", (e) => {
+      document.addEventListener("click", e => {
         if (!isMobile()) return;
         if (!tooltip.contains(e.target) && !infoIcon.contains(e.target)) {
           tooltip.classList.remove("visible");
@@ -322,21 +305,21 @@
       });
 
       /* -------------------------
-         SNAP LISTS FOR SLIDER
-      -------------------------- */
+         STARTING RADIUS LOGIC
+      --------------------------*/
 
       const SNAP_MILES = [
-        1, 2, 5, 10, 20, 30, 50, 75,
-        100, 150, 200, 300, 400, 500, 750,
-        1000, 1500, 2000, 3000, 4000, 6000, 8000,
-        10000, 12000
+        1,2,5,10,20,30,50,75,
+        100,150,200,300,400,500,750,
+        1000,1500,2000,3000,4000,6000,8000,
+        10000,12000
       ];
 
       const SNAP_KM = [
-        1, 2, 5, 10, 20, 30, 50, 75,
-        100, 150, 200, 300, 400, 500, 750,
-        1000, 1500, 2000, 3000, 4000, 6000, 8000,
-        10000, 20000
+        1,2,5,10,20,30,50,75,
+        100,150,200,300,400,500,750,
+        1000,1500,2000,3000,4000,6000,8000,
+        10000,20000     // removed 12k & 15k
       ];
 
       const radiusInput = document.getElementById("radius-input");
@@ -346,71 +329,65 @@
 
       let currentUnit = "mi";
 
-      function getSnaps() {
+      function getList() {
         return currentUnit === "mi" ? SNAP_MILES : SNAP_KM;
       }
 
-      function nearestIndex(arr, value) {
-        let idx = 0;
-        let diff = Math.abs(value - arr[0]);
+      function nearestIndex(arr, val) {
+        let best = 0;
+        let diff = Math.abs(arr[0] - val);
         for (let i = 1; i < arr.length; i++) {
-          const d = Math.abs(value - arr[i]);
-          if (d < diff) { diff = d; idx = i; }
+          let d = Math.abs(arr[i] - val);
+          if (d < diff) {
+            diff = d;
+            best = i;
+          }
         }
-        return idx;
+        return best;
       }
 
-      function initSlider() {
-        const snaps = getSnaps();
+      function init() {
+        const snaps = getList();
         radiusSlider.min = 0;
         radiusSlider.max = snaps.length - 1;
 
-        const startVal = 300;
-        const idx = nearestIndex(snaps, startVal);
-
+        const start = 300;
+        const idx = nearestIndex(snaps, start);
         radiusSlider.value = idx;
-        radiusInput.value = startVal;
+        radiusInput.value = snaps[idx];
       }
 
-      /* SLIDER → TEXTBOX (snap) */
       radiusSlider.addEventListener("input", () => {
-        const snaps = getSnaps();
-        radiusInput.value = snaps[radiusSlider.value];
+        const snaps = getList();
+        radiusInput.value = snaps[+radiusSlider.value];
       });
 
-      /* TEXTBOX → SLIDER (typed number allowed, slider snaps) */
-      radiusInput.addEventListener("input", () => {
-        let raw = radiusInput.value.replace(/[^0-9]/g, "");
-        if (raw === "") return;
+      radiusInput.addEventListener("change", () => {
+        const snaps = getList();
+        let num = Number(radiusInput.value);
+        if (Number.isNaN(num)) return;
 
-        let n = Math.round(Number(raw));
-        const snaps = getSnaps();
-        const min = snaps[0];
-        const max = snaps[snaps.length - 1];
+        num = Math.round(num);
+        if (num < snaps[0]) num = snaps[0];
+        if (num > snaps[snaps.length - 1]) num = snaps[snaps.length - 1];
 
-        if (n < min) n = min;
-        if (n > max) n = max;
-
-        radiusInput.value = n;
-
-        const idx = nearestIndex(snaps, n);
+        const idx = nearestIndex(snaps, num);
         radiusSlider.value = idx;
       });
 
-      /* UNIT SWITCH (no conversion just snapping) */
       unitMiles.addEventListener("change", () => {
         if (!unitMiles.checked) return;
         currentUnit = "mi";
-        radiusInput.dispatchEvent(new Event("input"));
+        init();
       });
 
       unitKm.addEventListener("change", () => {
         if (!unitKm.checked) return;
         currentUnit = "km";
-        radiusInput.dispatchEvent(new Event("input"));
+        init();
       });
 
-      initSlider();
+      init();
     </script>
 
   </body>
