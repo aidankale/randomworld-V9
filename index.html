@@ -32,6 +32,7 @@
         font-size: 20px;
       }
 
+      /* Stack checkboxes vertically */
       .settings > label {
         display: block;
         margin-bottom: 8px;
@@ -115,6 +116,7 @@
         }
       }
 
+      /* STARTING RADIUS BLOCK */
       .radius-block {
         margin-top: 15px;
       }
@@ -138,7 +140,7 @@
       }
 
       #radius-input {
-        width: 60px;
+        width: 60px;  /* slightly shorter as you wanted */
         padding: 4px 6px;
         font-size: 16px;
       }
@@ -151,8 +153,9 @@
         white-space: nowrap;
       }
 
+      /* Fixed-width slider (no jump) */
       #radius-slider {
-        width: 230px;
+        width: 230px;      /* adjust this if you want it longer/shorter */
         max-width: 100%;
         display: block;
       }
@@ -161,6 +164,7 @@
         margin-top: 4px;
       }
 
+      /* MOBILE VERSION */
       @media (max-width: 768px) {
 
         #map-placeholder {
@@ -220,6 +224,7 @@
           pointer-events: auto !important;
         }
 
+        /* Mobile radius block */
         .radius-row {
           flex-wrap: wrap;
         }
@@ -242,7 +247,7 @@
         }
 
         #radius-slider {
-          width: 70%;
+          width: 70%;   /* proportionally matches input row on mobile */
         }
       }
     </style>
@@ -282,19 +287,19 @@
           </div>
         </div>
 
-        <label>
-          <input type="checkbox" id="random-start">
-          Random
-        </label>
+      <label>
+        <input type="checkbox" id="random-start">
+        Random
+      </label>
       </div>
 
+      <!-- STARTING RADIUS BLOCK -->
       <div class="radius-block">
 
         <div class="radius-row">
           <span class="radius-label">Starting radius:</span>
 
           <div class="radius-controls">
-
             <input
               type="text"
               id="radius-input"
@@ -303,7 +308,7 @@
               placeholder="300"
             >
 
-            <!-- ⭐ NOW KM FIRST, AND DEFAULT -->
+            <!-- KM FIRST & DEFAULT -->
             <label class="radius-unit-option">
               <input type="radio" name="radius-unit" value="km" id="radius-unit-km" checked>
               km
@@ -325,13 +330,14 @@
     </div>
 
     <script>
+      /* Grey-out for random start */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
-
       randomBox.addEventListener("change", () => {
         coordInput.disabled = randomBox.checked;
       });
 
+      /* Tooltip logic */
       function isMobile() {
         return ("ontouchstart" in window || navigator.maxTouchPoints > 0);
       }
@@ -348,7 +354,7 @@
           tooltip.style.position = "fixed";
           tooltip.style.left = `${r.left + r.width / 2}px`;
           tooltip.style.bottom = `${window.innerHeight - r.top + 5}px`;
-          tooltip.style.transform = "translateX(-50%)`;
+          tooltip.style.transform = "translateX(-50%)";
         }
       });
 
@@ -359,26 +365,28 @@
         }
       });
 
+      /* Radius logic */
+
       const SNAP_MILES = [
-        1,2,5,10,20,30,50,75,
-        100,150,200,300,400,500,750,
-        1000,1500,2000,3000,4000,6000,
-        8000,10000,12000
+        1, 2, 5, 10, 20, 30, 50, 75,
+        100, 150, 200, 300, 400, 500, 750,
+        1000, 1500, 2000, 3000, 4000, 6000,
+        8000, 10000, 12000
       ];
 
       const SNAP_KM = [
-        1,2,5,10,20,30,50,75,
-        100,150,200,300,400,500,750,
-        1000,1500,2000,3000,4000,6000,
-        8000,10000,20000
+        1, 2, 5, 10, 20, 30, 50, 75,
+        100, 150, 200, 300, 400, 500, 750,
+        1000, 1500, 2000, 3000, 4000, 6000,
+        8000, 10000, 20000
       ];
 
       const radiusInput = document.getElementById("radius-input");
       const radiusSlider = document.getElementById("radius-slider");
-      const unitMiles = document.getElementById("radius-unit-mi");
-      const unitKm = document.getElementById("radius-unit-km");
+      const unitMiles   = document.getElementById("radius-unit-mi");
+      const unitKm      = document.getElementById("radius-unit-km");
 
-      // ⭐ DEFAULT NOW KM
+      // KM is the default
       let currentUnit = "km";
 
       function getCurrentSnapList() {
@@ -411,12 +419,14 @@
         radiusInput.value = snaps[idx];
       }
 
+      // Slider → Textbox
       radiusSlider.addEventListener("input", () => {
         const snaps = getCurrentSnapList();
         const idx = Number(radiusSlider.value);
         radiusInput.value = snaps[idx];
       });
 
+      // Textbox → Slider (snap to nearest discrete value)
       function handleRadiusInputChange() {
         const snaps = getCurrentSnapList();
         let raw = radiusInput.value.replace(/\D/g, "");
@@ -435,6 +445,7 @@
       radiusInput.addEventListener("change", handleRadiusInputChange);
       radiusInput.addEventListener("blur", handleRadiusInputChange);
 
+      // Unit switching
       unitKm.addEventListener("change", () => {
         if (!unitKm.checked) return;
         currentUnit = "km";
