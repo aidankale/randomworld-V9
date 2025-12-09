@@ -115,7 +115,7 @@
         }
       }
 
-      /* Radius block styling */
+      /* Starting radius block */
       .radius-block {
         margin-top: 15px;
       }
@@ -135,6 +135,7 @@
         display: flex;
         align-items: center;
         gap: 6px;
+        flex-wrap: nowrap;
       }
 
       #radius-input {
@@ -147,6 +148,7 @@
         display: flex;
         align-items: center;
         gap: 4px;
+        font-size: 14px;
         white-space: nowrap;
       }
 
@@ -156,19 +158,72 @@
         display: block;
       }
 
+      .radius-slider-row {
+        margin-top: 4px;
+      }
+
+      /* Mobile adjustments */
       @media (max-width: 768px) {
-        .coord-row { flex-wrap: wrap; }
-        .coord-row > span { flex-basis: 100%; }
+        #map-placeholder {
+          height: 40vh;
+        }
 
-        .textbox-column { width: 70%; }
-        .coord-row input[type="text"] { width: 70%; }
+        .coord-row {
+          flex-wrap: wrap;
+        }
 
-        .coord-help { width: 70% !important; }
+        .coord-row > span {
+          flex-basis: 100%;
+        }
 
-        .radius-row { flex-wrap: wrap; }
-        .radius-label { flex-basis: 100%; }
-        #radius-input { width: 30%; }
-        #radius-slider { width: 70%; }
+        .textbox-column {
+          width: 70%;
+          align-items: flex-start;
+        }
+
+        .coord-row input[type="text"] {
+          width: 70%;
+        }
+
+        .coord-help {
+          width: 70% !important;
+          margin-left: 9px;
+        }
+
+        .coord-row > label:last-child {
+          margin-left: -60px;
+          margin-top: -27px;
+        }
+
+        .tooltip {
+          opacity: 0 !important;
+          pointer-events: none !important;
+        }
+
+        .tooltip.visible {
+          opacity: 1 !important;
+          pointer-events: auto !important;
+        }
+
+        .radius-row {
+          flex-wrap: wrap;
+        }
+
+        .radius-label {
+          flex-basis: 100%;
+        }
+
+        .radius-controls {
+          width: 100%;
+        }
+
+        #radius-input {
+          width: 30%;
+        }
+
+        #radius-slider {
+          width: 70%;
+        }
       }
     </style>
   </head>
@@ -213,14 +268,20 @@
         </label>
       </div>
 
-      <!-- STARTING RADIUS BLOCK -->
+      <!-- Starting Radius Block -->
       <div class="radius-block">
 
         <div class="radius-row">
           <span class="radius-label">Starting radius:</span>
 
           <div class="radius-controls">
-            <input type="text" id="radius-input" inputmode="numeric" pattern="\d*" placeholder="300">
+            <input
+              type="text"
+              id="radius-input"
+              inputmode="numeric"
+              pattern="\d*"
+              placeholder="300"
+            >
 
             <label class="radius-unit-option">
               <input type="radio" name="radius-unit" value="km" id="radius-unit-km" checked>
@@ -243,12 +304,43 @@
     </div>
 
     <script>
-      /* Tooltip + random grey-out kept unchanged */
+      /* Grey-out */
+      const randomBox = document.getElementById("random-start");
+      const coordInput = document.getElementById("start-coordinate");
+      randomBox.addEventListener("change", () => {
+        coordInput.disabled = randomBox.checked;
+      });
 
+      /* Tooltip */
       function isMobile() {
         return ("ontouchstart" in window || navigator.maxTouchPoints > 0);
       }
 
+      const infoIcon = document.getElementById("info-icon");
+      const tooltip = document.getElementById("tooltip");
+
+      infoIcon.addEventListener("click", (e) => {
+        if (!isMobile()) return;
+        e.stopPropagation();
+        tooltip.classList.toggle("visible");
+
+        if (tooltip.classList.contains("visible")) {
+          const r = infoIcon.getBoundingClientRect();
+          tooltip.style.position = "fixed";
+          tooltip.style.left = `${r.left + r.width / 2}px`;
+          tooltip.style.bottom = `${window.innerHeight - r.top + 5}px`;
+          tooltip.style.transform = "translateX(-50%)`;
+        }
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!isMobile()) return;
+        if (!tooltip.contains(e.target) && !infoIcon.contains(e.target)) {
+          tooltip.classList.remove("visible");
+        }
+      });
+
+      /* Radius Logic */
       const SNAP_MILES = [
         1, 2, 5, 10, 20, 30, 50, 75,
         100, 150, 200, 300, 400, 500, 750,
@@ -265,65 +357,84 @@
 
       const radiusInput = document.getElementById("radius-input");
       const radiusSlider = document.getElementById("radius-slider");
-      const unitMiles = document.getElementById("radius-unit-mi");
-      const unitKm = document.getElementById("radius-unit-km");
+      const unitMiles   = document.getElementById("radius-unit-mi");
+      const unitKm      = document.getElementById("radius-unit-km");
 
-      let currentUnit = "km"; // default
+      let currentUnit = "km";  // DEFAULT = KM
 
-      function getSnaps() {
+      function getCurrentSnapList() {
         return currentUnit === "km" ? SNAP_KM : SNAP_MILES;
       }
 
-      function snapIndexFor(value) {
-        const list = getSnaps();
-        let best = 0;
-        for (let i = 1; i < list.length; i++) {
-          if (Math.abs(list[i] - value) < Math.abs(list[best] - value)) best = i;
+      function findNearestIndex(arr, value) {
+        let bestIdx = 0;
+        let bestDiff = Math.abs(arr[0] - value);
+        for (let i = 1; i < arr.length; i++) {
+          const diff = Math.abs(arr[i] - value);
+          if (diff < bestDiff) {
+            bestDiff = diff;
+            bestIdx = i;
+          }
         }
-        return best;
+        return bestIdx;
       }
 
-      function initSlider() {
-        const snaps = getSnaps();
+      function initRadiusControls() {
+        const snaps = getCurrentSnapList();
         radiusSlider.min = 0;
         radiusSlider.max = snaps.length - 1;
         radiusSlider.step = 1;
 
-        const defaultVal = 300;
-        radiusInput.value = defaultVal;
-        radiusSlider.value = snapIndexFor(defaultVal);
+        const defaultValue = 300;
+        const idx = findNearestIndex(snaps, defaultValue);
+
+        radiusSlider.value = idx;
+        radiusInput.value = defaultValue;  // ← user value, NOT snapped
       }
 
       radiusSlider.addEventListener("input", () => {
-        const snaps = getSnaps();
-        radiusInput.value = snaps[radiusSlider.value];
+        const snaps = getCurrentSnapList();
+        const idx = Number(radiusSlider.value);
+        radiusInput.value = snaps[idx];   // dragging always snaps
       });
 
-      radiusInput.addEventListener("change", () => {
-        let v = Number(radiusInput.value.replace(/\D/g, ""));
-        if (!v) return;
-        const snaps = getSnaps();
+      function handleRadiusInputChange() {
+        const snaps = getCurrentSnapList();
+        let raw = radiusInput.value.replace(/\D/g, "");
+        if (raw === "") return;
 
-        if (v < snaps[0]) v = snaps[0];
-        if (v > snaps[snaps.length - 1]) v = snaps[snaps.length - 1];
+        let num = Math.round(Number(raw));
+        if (Number.isNaN(num)) num = snaps[0];
 
-        radiusInput.value = v;  // KEEP EXACT USER VALUE
-        radiusSlider.value = snapIndexFor(v); // SLIDER MOVES TO NEAREST SNAP
-      });
+        if (num < snaps[0]) num = snaps[0];
+        if (num > snaps[snaps.length - 1]) num = snaps[snaps.length - 1];
+
+        const idx = findNearestIndex(snaps, num);
+
+        radiusSlider.value = idx;  // slider moves to nearest snap
+        radiusInput.value = num;   // user's exact entry stays
+      }
+
+      radiusInput.addEventListener("change", handleRadiusInputChange);
+      radiusInput.addEventListener("blur", handleRadiusInputChange);
 
       unitMiles.addEventListener("change", () => {
         if (!unitMiles.checked) return;
         currentUnit = "mi";
-        initSlider();
+        radiusSlider.min = 0;
+        radiusSlider.max = SNAP_MILES.length - 1;
+        handleRadiusInputChange();
       });
 
       unitKm.addEventListener("change", () => {
         if (!unitKm.checked) return;
         currentUnit = "km";
-        initSlider();
+        radiusSlider.min = 0;
+        radiusSlider.max = SNAP_KM.length - 1;
+        handleRadiusInputChange();
       });
 
-      initSlider();
+      initRadiusControls();
     </script>
 
   </body>
