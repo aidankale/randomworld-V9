@@ -294,6 +294,7 @@
           <span class="radius-label">Starting radius:</span>
 
           <div class="radius-controls">
+
             <input
               type="text"
               id="radius-input"
@@ -302,14 +303,15 @@
               placeholder="300"
             >
 
+            <!-- ⭐ NOW KM FIRST, AND DEFAULT -->
             <label class="radius-unit-option">
-              <input type="radio" name="radius-unit" value="mi" id="radius-unit-mi" checked>
-              mi
+              <input type="radio" name="radius-unit" value="km" id="radius-unit-km" checked>
+              km
             </label>
 
             <label class="radius-unit-option">
-              <input type="radio" name="radius-unit" value="km" id="radius-unit-km">
-              km
+              <input type="radio" name="radius-unit" value="mi" id="radius-unit-mi">
+              mi
             </label>
           </div>
         </div>
@@ -325,6 +327,7 @@
     <script>
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
+
       randomBox.addEventListener("change", () => {
         coordInput.disabled = randomBox.checked;
       });
@@ -345,7 +348,7 @@
           tooltip.style.position = "fixed";
           tooltip.style.left = `${r.left + r.width / 2}px`;
           tooltip.style.bottom = `${window.innerHeight - r.top + 5}px`;
-          tooltip.style.transform = "translateX(-50%)";
+          tooltip.style.transform = "translateX(-50%)`;
         }
       });
 
@@ -357,17 +360,17 @@
       });
 
       const SNAP_MILES = [
-        1, 2, 5, 10, 20, 30, 50, 75,
-        100, 150, 200, 300, 400, 500, 750,
-        1000, 1500, 2000, 3000, 4000, 6000,
-        8000, 10000, 12000
+        1,2,5,10,20,30,50,75,
+        100,150,200,300,400,500,750,
+        1000,1500,2000,3000,4000,6000,
+        8000,10000,12000
       ];
 
       const SNAP_KM = [
-        1, 2, 5, 10, 20, 30, 50, 75,
-        100, 150, 200, 300, 400, 500, 750,
-        1000, 1500, 2000, 3000, 4000, 6000,
-        8000, 10000, 20000
+        1,2,5,10,20,30,50,75,
+        100,150,200,300,400,500,750,
+        1000,1500,2000,3000,4000,6000,
+        8000,10000,20000
       ];
 
       const radiusInput = document.getElementById("radius-input");
@@ -375,10 +378,11 @@
       const unitMiles = document.getElementById("radius-unit-mi");
       const unitKm = document.getElementById("radius-unit-km");
 
-      let currentUnit = "mi";
+      // ⭐ DEFAULT NOW KM
+      let currentUnit = "km";
 
       function getCurrentSnapList() {
-        return currentUnit === "mi" ? SNAP_MILES : SNAP_KM;
+        return currentUnit === "km" ? SNAP_KM : SNAP_MILES;
       }
 
       function findNearestIndex(arr, value) {
@@ -399,8 +403,10 @@
         radiusSlider.min = 0;
         radiusSlider.max = snaps.length - 1;
         radiusSlider.step = 1;
+
         const defaultValue = 300;
         const idx = findNearestIndex(snaps, defaultValue);
+
         radiusSlider.value = idx;
         radiusInput.value = snaps[idx];
       }
@@ -415,10 +421,12 @@
         const snaps = getCurrentSnapList();
         let raw = radiusInput.value.replace(/\D/g, "");
         if (raw === "") return;
+
         let num = Math.round(Number(raw));
         if (Number.isNaN(num)) num = snaps[0];
         if (num < snaps[0]) num = snaps[0];
         if (num > snaps[snaps.length - 1]) num = snaps[snaps.length - 1];
+
         const idx = findNearestIndex(snaps, num);
         radiusSlider.value = idx;
         radiusInput.value = snaps[idx];
@@ -427,19 +435,19 @@
       radiusInput.addEventListener("change", handleRadiusInputChange);
       radiusInput.addEventListener("blur", handleRadiusInputChange);
 
-      unitMiles.addEventListener("change", () => {
-        if (!unitMiles.checked) return;
-        currentUnit = "mi";
-        radiusSlider.min = 0;
-        radiusSlider.max = SNAP_MILES.length - 1;
-        handleRadiusInputChange();
-      });
-
       unitKm.addEventListener("change", () => {
         if (!unitKm.checked) return;
         currentUnit = "km";
         radiusSlider.min = 0;
         radiusSlider.max = SNAP_KM.length - 1;
+        handleRadiusInputChange();
+      });
+
+      unitMiles.addEventListener("change", () => {
+        if (!unitMiles.checked) return;
+        currentUnit = "mi";
+        radiusSlider.min = 0;
+        radiusSlider.max = SNAP_MILES.length - 1;
         handleRadiusInputChange();
       });
 
