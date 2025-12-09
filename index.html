@@ -233,7 +233,6 @@
               type="text"
               id="radius-input"
               inputmode="numeric"
-              pattern="\d*"
               placeholder="300"
             >
 
@@ -258,14 +257,12 @@
     </div>
 
     <script>
-      /* Grey-out */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
       randomBox.addEventListener("change", () => {
         coordInput.disabled = randomBox.checked;
       });
 
-      /* Tooltip */
       function isMobile() {
         return ("ontouchstart" in window || navigator.maxTouchPoints > 0);
       }
@@ -277,7 +274,6 @@
         if (!isMobile()) return;
         e.stopPropagation();
         tooltip.classList.toggle("visible");
-
         if (tooltip.classList.contains("visible")) {
           const r = infoIcon.getBoundingClientRect();
           tooltip.style.position = "fixed";
@@ -293,8 +289,6 @@
           tooltip.classList.remove("visible");
         }
       });
-
-      /* Radius Logic */
 
       const SNAP_MILES = [
         1, 2, 5, 10, 20, 30, 50, 75,
@@ -343,18 +337,16 @@
         radiusInput.value = snaps[idx];
       }
 
-      /* SLIDER → INPUT */
       radiusSlider.addEventListener("input", () => {
         const snaps = getCurrentSnapList();
         radiusInput.value = snaps[radiusSlider.value];
       });
 
-      /* INPUT → SLIDER (fixed version) */
       function handleRadiusInputChange() {
         const snaps = getCurrentSnapList();
         let raw = radiusInput.value.trim();
 
-        if (!/^\d+$/.test(raw)) return;  // allow typing until it's a whole number
+        if (!/^\d+$/.test(raw)) return;
 
         let num = Number(raw);
 
@@ -369,7 +361,6 @@
       radiusInput.addEventListener("change", handleRadiusInputChange);
       radiusInput.addEventListener("blur", handleRadiusInputChange);
 
-      /* UNIT SWITCHING */
       unitKm.addEventListener("change", () => {
         if (!unitKm.checked) return;
         currentUnit = "km";
