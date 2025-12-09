@@ -32,6 +32,7 @@
         font-size: 20px;
       }
 
+      /* Stack checkboxes vertically */
       .settings > label {
         display: block;
         margin-bottom: 8px;
@@ -51,8 +52,7 @@
         margin-top: -5px;
       }
 
-      .coord-row input[type="text"],
-      #start-coordinate {
+      .coord-row input[type="text"] {
         width: 220px;
         padding: 6px;
         font-size: 16px;
@@ -116,6 +116,7 @@
         }
       }
 
+      /* STARTING RADIUS BLOCK */
       .radius-block {
         margin-top: 15px;
       }
@@ -127,6 +128,10 @@
         margin-bottom: 8px;
       }
 
+      .radius-label {
+        white-space: nowrap;
+      }
+
       .radius-controls {
         display: flex;
         align-items: center;
@@ -135,7 +140,7 @@
       }
 
       #radius-input {
-        width: 60px;
+        width: 60px;  /* slightly shorter as you wanted */
         padding: 4px 6px;
         font-size: 16px;
       }
@@ -148,6 +153,7 @@
         white-space: nowrap;
       }
 
+      /* Fixed-width slider (no jump) */
       #radius-slider {
         width: 230px;
         max-width: 100%;
@@ -158,24 +164,91 @@
         margin-top: 4px;
       }
 
+      /* MOBILE VERSION */
       @media (max-width: 768px) {
-        #map-placeholder { height: 40vh; }
-        .settings { margin: 15px; }
-        .coord-row { flex-wrap: wrap; }
-        .coord-row > span { flex-basis: 100%; }
-        .textbox-column { width: 70%; }
-        .coord-row input[type="text"] { width: 70%; }
-        .coord-help { width: 70% !important; }
+
+        #map-placeholder {
+          height: 40vh;
+        }
+
+        .settings {
+          font-size: 16px;
+          margin: 15px;
+        }
+
+        .settings h2 {
+          font-size: 20px;
+        }
+
+        .coord-row {
+          flex-wrap: wrap;
+          align-items: center;
+        }
+
+        .coord-row > span {
+        flex-basis: 100%;
+        margin-bottom: 0px;
+        }
+
+        .textbox-column {
+          width: 70%;
+          align-items: flex-start;
+          margin-top: -5px;
+        }
+
+        .coord-row input[type="text"] {
+          width: 70%;
+          padding: 8px;
+          font-size: 16px;
+        }
+
+        .coord-help {
+          width: 70% !important;
+          text-align: center;
+          margin-left: 9px;
+          margin-right: 0;
+        }
+
         .coord-row > label:last-child {
           margin-left: -60px;
           margin-top: -27px;
         }
-        .tooltip { opacity: 0 !important; pointer-events: none !important; }
-        .tooltip.visible { opacity: 1 !important; pointer-events: auto !important; }
-        .radius-row { flex-wrap: wrap; }
-        .radius-label { flex-basis: 100%; }
-        #radius-input { width: 30%; }
-        #radius-slider { width: 70%; }
+
+        .tooltip {
+          opacity: 0 !important;
+          pointer-events: none !important;
+        }
+
+        .tooltip.visible {
+          opacity: 1 !important;
+          pointer-events: auto !important;
+        }
+
+        /* Mobile radius block */
+        .radius-row {
+          flex-wrap: wrap;
+        }
+
+        .radius-label {
+          flex-basis: 100%;
+        }
+
+        .radius-controls {
+          width: 100%;
+          gap: 6px;
+        }
+
+        #radius-input {
+          width: 30%;
+        }
+
+        .radius-slider-row {
+          margin-top: 8px;
+        }
+
+        #radius-slider {
+          width: 70%;
+        }
       }
     </style>
   </head>
@@ -188,8 +261,15 @@
 
       <h2>Settings</h2>
 
-      <label><input type="checkbox" id="land-restriction"> Restrict all coordinates to land</label>
-      <label><input type="checkbox" id="avoid-antarctica"> Avoid Antarctica</label>
+      <label>
+        <input type="checkbox" id="land-restriction">
+        Restrict all coordinates to land
+      </label>
+
+      <label>
+        <input type="checkbox" id="avoid-antarctica">
+        Avoid Antarctica
+      </label>
 
       <div class="coord-row">
         <span>Starting coordinate:</span>
@@ -207,7 +287,10 @@
           </div>
         </div>
 
-        <label><input type="checkbox" id="random-start"> Random</label>
+      <label>
+        <input type="checkbox" id="random-start">
+        Random
+      </label>
       </div>
 
       <!-- STARTING RADIUS BLOCK -->
@@ -218,10 +301,9 @@
 
           <div class="radius-controls">
             <input
-              type="tel"
+              type="text"
               id="radius-input"
               inputmode="numeric"
-              pattern="\d*"
               placeholder="300"
             >
 
@@ -246,14 +328,14 @@
     </div>
 
     <script>
-      /* Grey-out */
+      /* Grey-out for random start */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
       randomBox.addEventListener("change", () => {
         coordInput.disabled = randomBox.checked;
       });
 
-      /* Tooltip */
+      /* Tooltip logic */
       function isMobile() {
         return ("ontouchstart" in window || navigator.maxTouchPoints > 0);
       }
@@ -264,12 +346,9 @@
       infoIcon.addEventListener("click", (e) => {
         if (!isMobile()) return;
         e.stopPropagation();
-
-        const r = infoIcon.getBoundingClientRect();  // FIXED: compute before toggle
-
         tooltip.classList.toggle("visible");
-
         if (tooltip.classList.contains("visible")) {
+          const r = infoIcon.getBoundingClientRect();
           tooltip.style.position = "fixed";
           tooltip.style.left = `${r.left + r.width / 2}px`;
           tooltip.style.bottom = `${window.innerHeight - r.top + 5}px`;
@@ -285,25 +364,27 @@
       });
 
       /* Radius logic */
+
       const SNAP_MILES = [
-        1,2,5,10,20,30,50,75,
-        100,150,200,300,400,500,750,
-        1000,1500,2000,3000,4000,6000,
-        8000,10000,12000
+        1, 2, 5, 10, 20, 30, 50, 75,
+        100, 150, 200, 300, 400, 500, 750,
+        1000, 1500, 2000, 3000, 4000, 6000,
+        8000, 10000, 12000
       ];
 
       const SNAP_KM = [
-        1,2,5,10,20,30,50,75,
-        100,150,200,300,400,500,750,
-        1000,1500,2000,3000,4000,6000,
-        8000,10000,20000
+        1, 2, 5, 10, 20, 30, 50, 75,
+        100, 150, 200, 300, 400, 500, 750,
+        1000, 1500, 2000, 3000, 4000, 6000,
+        8000, 10000, 20000
       ];
 
       const radiusInput = document.getElementById("radius-input");
       const radiusSlider = document.getElementById("radius-slider");
-      const unitMiles = document.getElementById("radius-unit-mi");
-      const unitKm = document.getElementById("radius-unit-km");
+      const unitMiles   = document.getElementById("radius-unit-mi");
+      const unitKm      = document.getElementById("radius-unit-km");
 
+      // KM is the default
       let currentUnit = "km";
 
       function getCurrentSnapList() {
@@ -336,12 +417,14 @@
         radiusInput.value = snaps[idx];
       }
 
+      // Slider → Textbox
       radiusSlider.addEventListener("input", () => {
         const snaps = getCurrentSnapList();
         const idx = Number(radiusSlider.value);
         radiusInput.value = snaps[idx];
       });
 
+      // Textbox → Slider (snap to nearest discrete value)
       function handleRadiusInputChange() {
         const snaps = getCurrentSnapList();
         let raw = radiusInput.value.replace(/\D/g, "");
@@ -360,6 +443,7 @@
       radiusInput.addEventListener("change", handleRadiusInputChange);
       radiusInput.addEventListener("blur", handleRadiusInputChange);
 
+      // Unit switching
       unitKm.addEventListener("change", () => {
         if (!unitKm.checked) return;
         currentUnit = "km";
