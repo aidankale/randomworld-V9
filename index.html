@@ -305,7 +305,7 @@
               id="radius-input"
               inputmode="numeric"
               pattern="\d*"
-              placeholder="300"
+              placeholder="100"
             >
 
             <!-- KM FIRST & DEFAULT -->
@@ -412,7 +412,7 @@
         radiusSlider.max = snaps.length - 1;
         radiusSlider.step = 1;
 
-        const defaultValue = 300;
+        const defaultValue = 100;
         const idx = findNearestIndex(snaps, defaultValue);
 
         radiusSlider.value = idx;
