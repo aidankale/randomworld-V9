@@ -429,7 +429,7 @@
       // Textbox → Slider (snap slider only, keep precise value)
       function handleRadiusInputChange() {
         const snaps = getCurrentSnapList();
-        let raw = radiusInput.value.replace(/\D/g, "");
+        let raw = radiusInput.value.replace(/[^0-9.]/g, "");
         if (raw === "") return;
 
         let num = Math.round(Number(raw));
