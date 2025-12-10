@@ -38,6 +38,10 @@
         margin-bottom: 8px;
       }
 
+      .indented-option {
+        margin-left: 20px; /* Adjust the value as needed */
+      }      
+
       .coord-row {
         margin-top: 15px;
         display: flex;
@@ -180,9 +184,9 @@
         display: inline-block;
         width: 0;
         height: 0;
-        border-top: 7px solid transparent;
-        border-bottom: 7px solid transparent;
-        border-left: 7px solid gray; /* This makes it a little gray triangle */
+        border-top: 5.5px solid transparent;
+        border-bottom: 5.5px solid transparent;
+        border-left: 8px solid gray; /* This makes it a little gray triangle */
         margin-left: 5px; /* Adjust as needed */
       }
 
@@ -301,16 +305,6 @@
 
       <h2>Settings</h2>
 
-      <label>
-        <input type="checkbox" id="land-restriction" checked>
-        Restrict all coordinates to land
-      </label>
-
-      <label>
-        <input type="checkbox" id="avoid-antarctica">
-        Avoid Antarctica
-      </label>
-
       <div class="coord-row">
         <span>Starting coordinate:</span>
 
@@ -373,7 +367,17 @@
       </div>
 
       <div id="advanced-section">
-        <!-- Advanced settings will go here -->
+
+        <label>
+          <input type="checkbox" id="land-restriction" checked>
+          Restrict all coordinates to land
+        </label>
+
+        <label class="indented-option">
+          <input type="checkbox" id="avoid-antarctica">
+          Avoid Antarctica
+        </label>
+
       </div>
 
     </div>
@@ -531,4 +535,3 @@
 
   </body>
 </html>
-
