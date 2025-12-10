@@ -176,14 +176,24 @@
         margin-top: 18px;
       }
 
-      .advanced-toggle .triangle {
+      .arrow {
+        display: inline-block;
+        width: 0;
+        height: 0;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-left: 6px solid gray; /* This makes it a little gray triangle */
+        margin-left: 5px; /* Adjust as needed */
+      }
+
+      .advanced-toggle .arrow {
         display: inline-block;
         transition: transform 0.2s ease;
         font-size: 12px;
         transform: rotate(0deg);
       }
 
-      .advanced-toggle.open .triangle {
+      .advanced-toggle.open .arrow {
         transform: rotate(90deg);
       }
 
@@ -192,6 +202,7 @@
         margin-top: 10px;
         padding-left: 4px;
       }
+
 
       /* MOBILE VERSION */
       @media (max-width: 768px) {
@@ -357,7 +368,7 @@
       </div>
 
       <div class="advanced-toggle">
-        <span class="triangle">▶</span>
+        <span class="arrow"></span>
         <span class="advanced-label">Advanced Settings</span>
       </div>
 
@@ -502,7 +513,7 @@
 
       // Advanced Settings toggle logic
       const advToggle = document.querySelector(".advanced-toggle");
-      const advTriangle = advToggle.querySelector(".triangle");
+      const advTriangle = advToggle.querySelector(".arrow");
       const advSection = document.getElementById("advanced-section");
 
       advToggle.addEventListener("click", () => {
