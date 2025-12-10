@@ -224,6 +224,12 @@
         width: fit-content;   /* IMPORTANT: prevents them from spanning full width */
       }
 
+      #advanced-section .antarctica-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
       .disabled-label {
         color: #aaa;
       }
@@ -402,15 +408,18 @@
           Restrict all coordinates to land
         </label>
 
-        <label class="indented-option">
-          <input type="checkbox" id="avoid-antarctica" checked>
-          Avoid Antarctica
-          <span class="info-icon" id="antarctica-info">i
-            <span class="tooltip" id="antarctica-tooltip">
-              Avoids land below 60ºS
+        <div class="antarctica-row">
+          <label class="indented-option">
+            <input type="checkbox" id="avoid-antarctica" checked>
+            Avoid Antarctica
+          </label>
+
+          <span class="info-icon" id="info-antarctica">i
+            <span class="tooltip" id="tooltip-antarctica">
+              Avoids land below 60°S
             </span>
           </span>
-        </label>
+        </div>
 
       </div>
 
@@ -445,6 +454,25 @@
         }
       });
 
+      const infoAntarctica = document.getElementById("info-antarctica");
+      const tooltipAntarctica = document.getElementById("tooltip-antarctica");
+
+      infoAntarctica.addEventListener("click", (e) => {
+        if (!isMobile()) return;
+        e.stopPropagation();
+        tooltipAntarctica.classList.toggle("visible");
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!isMobile()) return;
+        if (
+          !tooltipAntarctica.contains(e.target) &&
+          !infoAntarctica.contains(e.target)
+        ) {
+          tooltipAntarctica.classList.remove("visible");
+        }
+      });
+
       // Antarctica tooltip
       const antarcticaIcon = document.getElementById("antarctica-info");
       const antarcticaTooltip = document.getElementById("antarctica-tooltip");
@@ -465,17 +493,17 @@
       /* Radius logic */
 
       const SNAP_MILES = [
-        1, 2, 5, 10, 20, 30, 50, 75,
+        1, 2, 3, 5, 10, 15, 20, 30, 50, 75,
         100, 150, 200, 300, 400, 500, 750,
-        1000, 1500, 2000, 3000, 4000, 6000,
-        8000, 10000, 12000
+        1000, 1500, 2000, 3000, 4000, 5000,
+        7500, 10000, 12000
       ];
 
       const SNAP_KM = [
-        1, 2, 5, 10, 20, 30, 50, 75,
+        1, 2, 3, 5, 10, 15, 20, 30, 50, 75,
         100, 150, 200, 300, 400, 500, 750,
-        1000, 1500, 2000, 3000, 4000, 6000,
-        8000, 10000, 20000
+        1000, 1500, 2000, 3000, 4000, 5000,
+        7500, 10000, 20000
       ];
 
       const radiusInput = document.getElementById("radius-input");
