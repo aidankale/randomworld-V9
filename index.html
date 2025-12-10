@@ -534,7 +534,27 @@
         }
       });
 
+      // Store the previous state of the "Avoid Antarctica" checkbox
+      let previousAvoidAntarcticaState = true; // default to checked
+
+      const restrictLandCheckbox = document.getElementById('land-restriction');
+      const avoidAntarcticaCheckbox = document.getElementById('avoid-antarctica');
+
+      restrictLandCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+          // If "Restrict all coordinates to land" is checked again, restore the previous state of "Avoid Antarctica"
+          avoidAntarcticaCheckbox.checked = previousAvoidAntarcticaState;
+          avoidAntarcticaCheckbox.disabled = false;
+        } else {
+          // If "Restrict all coordinates to land" is unchecked, save the current state and then uncheck and disable "Avoid Antarctica"
+          previousAvoidAntarcticaState = avoidAntarcticaCheckbox.checked;
+          avoidAntarcticaCheckbox.checked = false;
+          avoidAntarcticaCheckbox.disabled = true;
+        }
+      });
+
       initRadiusControls();
+
     </script>
 
   </body>
