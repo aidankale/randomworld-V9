@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
+      html, body {
+        max-width: 100%;
+        overflow-x: hidden;
+        overscroll-behavior-x: none;
+        touch-action: pan-y;
+      }
+      
       body {
         margin: 0;
         padding: 0;
@@ -283,6 +290,16 @@
           pointer-events: auto !important;
         }
 
+        /* Force tooltip to appear above the icon in a fixed, consistent position on mobile */
+        @media (max-width: 768px) {
+          .tooltip.visible {
+            position: absolute !important;
+            left: 50% !important;
+            bottom: 22px !important;
+            transform: translateX(-50%) !important;
+          }
+        }
+
         /* Mobile radius block */
         .radius-row {
           flex-wrap: wrap;
@@ -417,13 +434,6 @@
         if (!isMobile()) return;
         e.stopPropagation();
         tooltip.classList.toggle("visible");
-        if (tooltip.classList.contains("visible")) {
-          const r = infoIcon.getBoundingClientRect();
-          tooltip.style.position = "fixed";
-          tooltip.style.left = `${r.left + r.width / 2}px`;
-          tooltip.style.bottom = `${window.innerHeight - r.top + 5}px`;
-          tooltip.style.transform = "translateX(-50%)";
-        }
       });
 
       document.addEventListener("click", (e) => {
