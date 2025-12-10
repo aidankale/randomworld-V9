@@ -164,6 +164,35 @@
         margin-top: 4px;
       }
 
+      /* Advanced Settings toggle */
+      .advanced-toggle {
+        color: #666;
+        font-size: 14px;
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 18px;
+      }
+
+      .advanced-toggle .arrow {
+        display: inline-block;
+        transition: transform 0.2s ease;
+        font-size: 12px;
+        transform: rotate(0deg); /* pointing right */
+      }
+
+      .advanced-toggle.open .arrow {
+        transform: rotate(90deg); /* pointing down when opened */
+      }
+
+      #advanced-section {
+        display: none; /* hidden until we turn it on later */
+        margin-top: 10px;
+        padding-left: 4px;
+      }
+
       /* MOBILE VERSION */
       @media (max-width: 768px) {
 
@@ -262,7 +291,7 @@
       <h2>Settings</h2>
 
       <label>
-        <input type="checkbox" id="land-restriction">
+        <input type="checkbox" id="land-restriction" checked>
         Restrict all coordinates to land
       </label>
 
@@ -325,6 +354,11 @@
           <input type="range" id="radius-slider">
         </div>
 
+      </div>
+
+      <div class="advanced-toggle">
+        <span class="triangle">▶</span>
+        <span class="advanced-label">Advanced Settings</span>
       </div>
 
     </div>
