@@ -176,15 +176,15 @@
         margin-top: 18px;
       }
 
-      .advanced-toggle .arrow {
+      .advanced-toggle .triangle {
         display: inline-block;
         transition: transform 0.2s ease;
         font-size: 12px;
-        transform: rotate(0deg); /* pointing right */
+        transform: rotate(0deg);
       }
 
-      .advanced-toggle.open .arrow {
-        transform: rotate(90deg); /* pointing down when opened */
+      .advanced-toggle.open .triangle {
+        transform: rotate(90deg);
       }
 
       #advanced-section {
@@ -361,6 +361,10 @@
         <span class="advanced-label">Advanced Settings</span>
       </div>
 
+      <div id="advanced-section">
+        <!-- Advanced settings will go here -->
+      </div>
+
     </div>
 
     <script>
@@ -494,6 +498,21 @@
         radiusSlider.min = 0;
         radiusSlider.max = SNAP_MILES.length - 1;
         handleRadiusInputChange();
+      });
+
+      // Advanced Settings toggle logic
+      const advToggle = document.querySelector(".advanced-toggle");
+      const advTriangle = advToggle.querySelector(".triangle");
+      const advSection = document.getElementById("advanced-section");
+
+      advToggle.addEventListener("click", () => {
+        advToggle.classList.toggle("open");
+
+        if (advToggle.classList.contains("open")) {
+          advSection.style.display = "block";
+        } else {
+          advSection.style.display = "none";
+        }
       });
 
       initRadiusControls();
