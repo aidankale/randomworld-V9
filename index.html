@@ -405,6 +405,11 @@
         <label class="indented-option">
           <input type="checkbox" id="avoid-antarctica" checked>
           Avoid Antarctica
+          <span class="info-icon" id="antarctica-info">i
+            <span class="tooltip" id="antarctica-tooltip">
+              Avoids land below 60ºS
+            </span>
+          </span>
         </label>
 
       </div>
@@ -437,6 +442,23 @@
         if (!isMobile()) return;
         if (!tooltip.contains(e.target) && !infoIcon.contains(e.target)) {
           tooltip.classList.remove("visible");
+        }
+      });
+
+      // Antarctica tooltip
+      const antarcticaIcon = document.getElementById("antarctica-info");
+      const antarcticaTooltip = document.getElementById("antarctica-tooltip");
+
+      antarcticaIcon.addEventListener("click", (e) => {
+        if (!isMobile()) return;
+        e.stopPropagation();
+        antarcticaTooltip.classList.toggle("visible");
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!isMobile()) return;
+        if (!antarcticaTooltip.contains(e.target) && !antarcticaIcon.contains(e.target)) {
+          antarcticaTooltip.classList.remove("visible");
         }
       });
 
