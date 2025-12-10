@@ -32,7 +32,6 @@
         font-size: 20px;
       }
 
-      /* Stack checkboxes vertically */
       .settings > label {
         display: block;
         margin-bottom: 8px;
@@ -70,7 +69,6 @@
         color: #666;
         text-align: center;
         width: 220px;
-        display: block;
         margin-left: auto;
         margin-right: auto;
       }
@@ -116,7 +114,7 @@
         }
       }
 
-      /* STARTING RADIUS BLOCK */
+      /* RADIUS BLOCK */
       .radius-block {
         margin-top: 15px;
       }
@@ -140,7 +138,7 @@
       }
 
       #radius-input {
-        width: 47px;  /* slightly shorter as you wanted */
+        width: 47px;
         padding: 4px 6px;
         font-size: 16px;
       }
@@ -153,9 +151,8 @@
         white-space: nowrap;
       }
 
-      /* Fixed-width slider (no jump) */
       #radius-slider {
-        width: 266px;      /* adjust this if you want it longer/shorter */
+        width: 266px;
         max-width: 100%;
         display: block;
       }
@@ -164,9 +161,22 @@
         margin-top: 4px;
       }
 
-      /* MOBILE VERSION */
-      @media (max-width: 768px) {
+      /* ADVANCED SETTINGS */
+      #advanced-toggle {
+        cursor: pointer;
+        margin-top: 20px;
+        font-size: 16px;
+        user-select: none;
+      }
 
+      #advanced-section {
+        margin-top: 10px;
+        display: none;
+        padding-left: 5px;
+      }
+
+      /* MOBILE */
+      @media (max-width: 768px) {
         #map-placeholder {
           height: 40vh;
         }
@@ -176,10 +186,6 @@
           margin: 15px;
         }
 
-        .settings h2 {
-          font-size: 20px;
-        }
-
         .coord-row {
           flex-wrap: wrap;
           align-items: center;
@@ -187,12 +193,10 @@
 
         .coord-row > span {
           flex-basis: 100%;
-          margin-bottom: 0px;
         }
 
         .textbox-column {
           width: 70%;
-          align-items: flex-start;
           margin-top: -5px;
         }
 
@@ -205,13 +209,6 @@
         .coord-help {
           width: 70% !important;
           text-align: center;
-          margin-left: 9px;
-          margin-right: 0;
-        }
-
-        .coord-row > label:last-child {
-          margin-left: -60px;
-          margin-top: -27px;
         }
 
         .tooltip {
@@ -224,7 +221,6 @@
           pointer-events: auto !important;
         }
 
-        /* Mobile radius block */
         .radius-row {
           flex-wrap: wrap;
         }
@@ -242,12 +238,8 @@
           width: 15%;
         }
 
-        .radius-slider-row {
-          margin-top: 8px;
-        }
-
         #radius-slider {
-          width: 70%;   /* proportionally matches input row on mobile */
+          width: 70%;
         }
       }
     </style>
@@ -261,14 +253,10 @@
 
       <h2>Settings</h2>
 
+      <!-- CHECKED BY DEFAULT NOW -->
       <label>
-        <input type="checkbox" id="land-restriction">
+        <input type="checkbox" id="land-restriction" checked>
         Restrict all coordinates to land
-      </label>
-
-      <label>
-        <input type="checkbox" id="avoid-antarctica">
-        Avoid Antarctica
       </label>
 
       <div class="coord-row">
@@ -293,9 +281,9 @@
         </label>
       </div>
 
-      <!-- STARTING RADIUS BLOCK -->
-      <div class="radius-block">
 
+      <!-- RADIUS BLOCK -->
+      <div class="radius-block">
         <div class="radius-row">
           <span class="radius-label">Starting radius:</span>
 
@@ -308,7 +296,6 @@
               placeholder="100"
             >
 
-            <!-- KM FIRST & DEFAULT -->
             <label class="radius-unit-option">
               <input type="radio" name="radius-unit" value="km" id="radius-unit-km" checked>
               km
@@ -324,20 +311,41 @@
         <div class="radius-slider-row">
           <input type="range" id="radius-slider">
         </div>
+      </div>
+
+
+      <!-- ADVANCED SETTINGS TOGGLE -->
+      <div id="advanced-toggle">Advanced settings ▼</div>
+
+      <!-- ADVANCED SECTION (initially hidden) -->
+      <div id="advanced-section">
+
+        <label>
+          <input type="checkbox" id="avoid-antarctica">
+
+          Avoid Antarctica
+          <!-- info icon for Antarctica -->
+          <span class="info-icon" id="antarctica-info">i
+            <span class="tooltip" id="antarctica-tooltip">
+              <!-- You will fill this later -->
+              Tooltip placeholder
+            </span>
+          </span>
+        </label>
 
       </div>
 
     </div>
 
     <script>
-      /* Grey-out for random start */
+      /* GREY OUT */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
       randomBox.addEventListener("change", () => {
         coordInput.disabled = randomBox.checked;
       });
 
-      /* Tooltip logic */
+      /* TOOLTIP LOGIC */
       function isMobile() {
         return ("ontouchstart" in window || navigator.maxTouchPoints > 0);
       }
@@ -354,7 +362,7 @@
           tooltip.style.position = "fixed";
           tooltip.style.left = `${r.left + r.width / 2}px`;
           tooltip.style.bottom = `${window.innerHeight - r.top + 5}px`;
-          tooltip.style.transform = "translateX(-50%)";
+          tooltip.style.transform = "translateX(-50%)`;
         }
       });
 
@@ -365,28 +373,66 @@
         }
       });
 
-      /* Radius logic */
+      /* ANTARCTICA TOOLTIP */
+      const antarcticaInfo = document.getElementById("antarctica-info");
+      const antarcticaTooltip = document.getElementById("antarctica-tooltip");
 
+      antarcticaInfo.addEventListener("click", (e) => {
+        if (!isMobile()) return;
+        e.stopPropagation();
+        antarcticaTooltip.classList.toggle("visible");
+
+        if (antarcticaTooltip.classList.contains("visible")) {
+          const r = antarcticaInfo.getBoundingClientRect();
+          antarcticaTooltip.style.position = "fixed";
+          antarcticaTooltip.style.left = `${r.left + r.width / 2}px`;
+          antarcticaTooltip.style.bottom = `${window.innerHeight - r.top + 5}px`;
+          antarcticaTooltip.style.transform = "translateX(-50%)`;
+        }
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!isMobile()) return;
+        if (
+          !antarcticaTooltip.contains(e.target) &&
+          !antarcticaInfo.contains(e.target)
+        ) {
+          antarcticaTooltip.classList.remove("visible");
+        }
+      });
+
+      /* ADVANCED SETTINGS TOGGLE */
+      const advancedToggle = document.getElementById("advanced-toggle");
+      const advancedSection = document.getElementById("advanced-section");
+
+      advancedToggle.addEventListener("click", () => {
+        const open = advancedSection.style.display === "block";
+        advancedSection.style.display = open ? "none" : "block";
+        advancedToggle.textContent = open
+          ? "Advanced settings ▼"
+          : "Advanced settings ▲";
+      });
+
+      /* RADIUS SNAPPING */
       const SNAP_MILES = [
-        1, 2, 5, 10, 20, 30, 50, 75,
-        100, 150, 200, 300, 400, 500, 750,
-        1000, 1500, 2000, 3000, 4000, 6000,
-        8000, 10000, 12000
+        1,2,5,10,20,30,50,75,
+        100,150,200,300,400,500,750,
+        1000,1500,2000,3000,4000,6000,
+        8000,10000,12000
       ];
 
       const SNAP_KM = [
-        1, 2, 5, 10, 20, 30, 50, 75,
-        100, 150, 200, 300, 400, 500, 750,
-        1000, 1500, 2000, 3000, 4000, 6000,
-        8000, 10000, 20000
+        1,2,5,10,20,30,50,75,
+        100,150,200,300,400,500,750,
+        1000,1500,2000,3000,4000,6000,
+        8000,10000,20000
       ];
 
       const radiusInput = document.getElementById("radius-input");
       const radiusSlider = document.getElementById("radius-slider");
-      const unitMiles   = document.getElementById("radius-unit-mi");
-      const unitKm      = document.getElementById("radius-unit-km");
+      const unitMiles = document.getElementById("radius-unit-mi");
+      const unitKm = document.getElementById("radius-unit-km");
 
-      // KM is the default
       let currentUnit = "km";
 
       function getCurrentSnapList() {
@@ -419,14 +465,11 @@
         radiusInput.value = snaps[idx];
       }
 
-      // Slider → Textbox
       radiusSlider.addEventListener("input", () => {
         const snaps = getCurrentSnapList();
-        const idx = Number(radiusSlider.value);
-        radiusInput.value = snaps[idx];
+        radiusInput.value = snaps[Number(radiusSlider.value)];
       });
 
-      // Textbox → Slider (snap slider only, keep precise value)
       function handleRadiusInputChange() {
         const snaps = getCurrentSnapList();
         let raw = radiusInput.value.replace(/[^0-9.]/g, "");
@@ -439,17 +482,15 @@
 
         const idx = findNearestIndex(snaps, num);
         radiusSlider.value = idx;
-        radiusInput.value = num;   // ← key change: keep the exact (clamped) number
+        radiusInput.value = num;
       }
 
       radiusInput.addEventListener("change", handleRadiusInputChange);
       radiusInput.addEventListener("blur", handleRadiusInputChange);
 
-      // Unit switching
       unitKm.addEventListener("change", () => {
         if (!unitKm.checked) return;
         currentUnit = "km";
-        radiusSlider.min = 0;
         radiusSlider.max = SNAP_KM.length - 1;
         handleRadiusInputChange();
       });
@@ -457,7 +498,6 @@
       unitMiles.addEventListener("change", () => {
         if (!unitMiles.checked) return;
         currentUnit = "mi";
-        radiusSlider.min = 0;
         radiusSlider.max = SNAP_MILES.length - 1;
         handleRadiusInputChange();
       });
