@@ -140,7 +140,7 @@
       }
 
       #radius-input {
-        width: 60px;  /* slightly shorter as you wanted */
+        width: 47px;  /* slightly shorter as you wanted */
         padding: 4px 6px;
         font-size: 16px;
       }
@@ -148,49 +148,20 @@
       .radius-unit-option {
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 2px;
         font-size: 14px;
         white-space: nowrap;
       }
 
       /* Fixed-width slider (no jump) */
       #radius-slider {
-        width: 230px;      /* adjust this if you want it longer/shorter */
+        width: 266px;      /* adjust this if you want it longer/shorter */
         max-width: 100%;
         display: block;
       }
 
       .radius-slider-row {
         margin-top: 4px;
-      }
-
-      /* Advanced Settings toggle */
-      .advanced-toggle {
-        color: #666;
-        font-size: 14px;
-        cursor: pointer;
-        user-select: none;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-top: 18px;
-      }
-
-      .advanced-toggle .arrow {
-        display: inline-block;
-        transition: transform 0.2s ease;
-        font-size: 12px;
-        transform: rotate(0deg); /* pointing right */
-      }
-
-      .advanced-toggle.open .arrow {
-        transform: rotate(90deg); /* pointing down when opened */
-      }
-
-      #advanced-section {
-        display: none; /* hidden until we turn it on later */
-        margin-top: 10px;
-        padding-left: 4px;
       }
 
       /* MOBILE VERSION */
@@ -268,7 +239,7 @@
         }
 
         #radius-input {
-          width: 30%;
+          width: 15%;
         }
 
         .radius-slider-row {
@@ -291,7 +262,7 @@
       <h2>Settings</h2>
 
       <label>
-        <input type="checkbox" id="land-restriction" checked>
+        <input type="checkbox" id="land-restriction">
         Restrict all coordinates to land
       </label>
 
@@ -334,7 +305,7 @@
               id="radius-input"
               inputmode="numeric"
               pattern="\d*"
-              placeholder="300"
+              placeholder="100"
             >
 
             <!-- KM FIRST & DEFAULT -->
@@ -354,11 +325,6 @@
           <input type="range" id="radius-slider">
         </div>
 
-      </div>
-
-      <div class="advanced-toggle">
-        <span class="triangle">▶</span>
-        <span class="advanced-label">Advanced Settings</span>
       </div>
 
     </div>
@@ -446,7 +412,7 @@
         radiusSlider.max = snaps.length - 1;
         radiusSlider.step = 1;
 
-        const defaultValue = 300;
+        const defaultValue = 100;
         const idx = findNearestIndex(snaps, defaultValue);
 
         radiusSlider.value = idx;
@@ -463,8 +429,7 @@
       // Textbox → Slider (snap slider only, keep precise value)
       function handleRadiusInputChange() {
         const snaps = getCurrentSnapList();
-        let raw = radiusInput.value.replace(/[^0-9.]/g, ""); 
-        raw = raw.replace(/(\..*)\./g, "$1");  // allow only the first decimal point    
+        let raw = radiusInput.value.replace(/[^0-9.]/g, "");
         if (raw === "") return;
 
         let num = Math.round(Number(raw));
