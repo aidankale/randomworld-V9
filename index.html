@@ -32,9 +32,10 @@
         font-size: 20px;
       }
 
-      /* Stack checkboxes vertically */
       .settings > label {
-        display: block;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
         margin-bottom: 8px;
       }
 
@@ -174,10 +175,10 @@
         font-size: 14px;
         cursor: pointer;
         user-select: none;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 6px;
-        margin-top: 18px;
+        margin-top: 16px;
       }
 
       .arrow {
@@ -208,9 +209,19 @@
       }
 
       #advanced-section label {
-        display: block;
-        margin-bottom: 8px; /* or whatever spacing you prefer */
+        display: flex;        /* puts checkbox + text in one row */
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 8px;
+
+        width: fit-content;   /* IMPORTANT: prevents them from spanning full width */
       }
+
+      .disabled-label {
+        color: #aaa;
+      }
+
 
       /* MOBILE VERSION */
       @media (max-width: 768px) {
@@ -537,20 +548,14 @@
       // Store the previous state of the "Avoid Antarctica" checkbox
       let previousAvoidAntarcticaState = true; // default to checked
 
-      const restrictLandCheckbox = document.getElementById('land-restriction');
-      const avoidAntarcticaCheckbox = document.getElementById('avoid-antarctica');
+      const landBox  = document.getElementById("land-restriction");
+      const avoidBox = document.getElementById("avoid-antarctica");
+      const avoidLabel = avoidBox.parentElement;
 
-      restrictLandCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-          // If "Restrict all coordinates to land" is checked again, restore the previous state of "Avoid Antarctica"
-          avoidAntarcticaCheckbox.checked = previousAvoidAntarcticaState;
-          avoidAntarcticaCheckbox.disabled = false;
-        } else {
-          // If "Restrict all coordinates to land" is unchecked, save the current state and then uncheck and disable "Avoid Antarctica"
-          previousAvoidAntarcticaState = avoidAntarcticaCheckbox.checked;
-          avoidAntarcticaCheckbox.checked = false;
-          avoidAntarcticaCheckbox.disabled = true;
-        }
+      landBox.addEventListener("change", () => {
+        const enabled = landBox.checked;
+        avoidBox.disabled = !enabled;
+        avoidLabel.classList.toggle("disabled-label", !enabled);
       });
 
       initRadiusControls();
