@@ -473,23 +473,6 @@
         }
       });
 
-      // Antarctica tooltip
-      const antarcticaIcon = document.getElementById("antarctica-info");
-      const antarcticaTooltip = document.getElementById("antarctica-tooltip");
-
-      antarcticaIcon.addEventListener("click", (e) => {
-        if (!isMobile()) return;
-        e.stopPropagation();
-        antarcticaTooltip.classList.toggle("visible");
-      });
-
-      document.addEventListener("click", (e) => {
-        if (!isMobile()) return;
-        if (!antarcticaTooltip.contains(e.target) && !antarcticaIcon.contains(e.target)) {
-          antarcticaTooltip.classList.remove("visible");
-        }
-      });
-
       /* Radius logic */
 
       const SNAP_MILES = [
