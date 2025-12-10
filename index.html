@@ -9,7 +9,6 @@
         max-width: 100%;
         overflow-x: hidden;
         overscroll-behavior-x: none;
-        touch-action: pan-y;
       }
       
       body {
@@ -291,13 +290,11 @@
         }
 
         /* Force tooltip to appear above the icon in a fixed, consistent position on mobile */
-        @media (max-width: 768px) {
-          .tooltip.visible {
-            position: absolute !important;
-            left: 50% !important;
-            bottom: 22px !important;
-            transform: translateX(-50%) !important;
-          }
+        .tooltip.visible {
+          position: absolute !important;
+          left: 50% !important;
+          bottom: 20px !important;
+          transform: translateX(-50%) !important;
         }
 
         /* Mobile radius block */
