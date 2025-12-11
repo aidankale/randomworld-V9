@@ -365,7 +365,7 @@
             DMS or decimal
             <span class="info-icon" id="info-icon">i
               <span class="tooltip" id="tooltip">
-                Example: 40.748, -73.985 or 40°44'54"N 73°59'8"W
+                Example: 40.748444, -73.985667 or 40º44'54.4"N 73º59'08.4"W
               </span>
             </span>
           </div>
@@ -451,24 +451,88 @@
         let v = coordInput.value.trim();
         if (v === "") return;
 
-        // Try to detect decimal-format: two numeric parts separated by space/comma
-        let parts = v.split(/[, ]+/).filter(x => x.length > 0);
+        // --- UNIVERSAL CLEANUP ---
+        v = v
+          .replace(/[()]/g, "")        // remove parentheses
+          .replace(/,/g, " ")          // replace commas with spaces
+          .replace(/[º˚°]/g, "º")      // normalize ALL degree symbols to º
+          .replace(/\s+/g, " ")        // collapse spaces
+          .trim();
 
-        if (parts.length === 2) {
-          let lat = Number(parts[0]);
-          let lon = Number(parts[1]);
+        // --- DECIMAL WITH N/S/E/W (like "40.12 N 73.55 W") ---
+        let ns = v.match(/([NS])/i);
+        let ew = v.match(/([EW])/i);
 
-          // If BOTH parsed successfully as numbers → treat as decimal coordinate
-          if (!Number.isNaN(lat) && !Number.isNaN(lon)) {
-            lat = Number(lat.toFixed(6));
-            lon = Number(lon.toFixed(6));
+        if (ns && ew) {
+          let nums = v.match(/-?\d+(\.\d+)?/g);
+          if (nums && nums.length === 2) {
+            let lat = parseFloat(nums[0]);
+            let lon = parseFloat(nums[1]);
+
+            if (ns[1].toUpperCase() === "S") lat = -Math.abs(lat);
+            if (ns[1].toUpperCase() === "N") lat = Math.abs(lat);
+
+            if (ew[1].toUpperCase() === "W") lon = -Math.abs(lon);
+            if (ew[1].toUpperCase() === "E") lon = Math.abs(lon);
+
+            lat = lat.toFixed(6);
+            lon = lon.toFixed(6);
+
             coordInput.value = `${lat}, ${lon}`;
             lastValidCoord = coordInput.value;
             return;
           }
         }
 
-        // Otherwise: assume DMS or unknown → DO NOT round or restrict
+        // --- PURE DECIMAL FORMS ("40.12 -73.55", "(40.12 -73.55)") ---
+        let pair = v.match(/-?\d+(?:\.\d+)?/g);
+
+        if (pair && pair.length === 2) {
+          let lat = Number(pair[0]).toFixed(6);
+          let lon = Number(pair[1]).toFixed(6);
+
+          coordInput.value = `${lat}, ${lon}`;
+          lastValidCoord = coordInput.value;
+          return;
+        }
+
+        // --- DMS NORMALIZER (NO DECIMAL CONVERSION) ---
+        (function() {
+          const dmsRegex = /(\d+)\s*º\s*(\d+)[′']?\s*(\d+(?:\.\d+)?)?["″]?\s*([NSEW])/gi;
+          let matches = [...v.matchAll(dmsRegex)];
+
+          if (matches.length !== 2) return;  // must be exactly lat + lon
+
+          function cleanDMS(m) {
+            let deg = Number(m[1]);
+            let min = Number(m[2]);
+            let sec = Number(m[3] || 0);
+
+            // round to tenths place
+            sec = Number(sec.toFixed(1));
+
+            // minutes always 2 digits
+            const minStr = min.toString().padStart(2, "0");
+
+            // seconds formatting: strip .0 if present
+            let secStr = sec % 1 === 0
+              ? sec.toFixed(0)   // integer → "54"
+              : sec.toFixed(1);  // keep one decimal
+
+            secStr = secStr.padStart(2, "0");
+
+            return `${deg}º${minStr}'${secStr}"${m[4].toUpperCase()}`;
+          }
+
+          let lat = matches.find(m => /[NS]/i.test(m[4]));
+          let lon = matches.find(m => /[EW]/i.test(m[4]));
+
+          if (lat && lon) {
+            coordInput.value = `${cleanDMS(lat)} ${cleanDMS(lon)}`;
+            lastValidCoord = coordInput.value;
+            return;
+          }
+        })();
         // Just record what the user typed
         lastValidCoord = v;
       });
