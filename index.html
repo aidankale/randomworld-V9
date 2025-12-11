@@ -583,8 +583,32 @@
 
       // Textbox → Slider (snap slider only, keep precise value)
       function handleRadiusInputChange() {
-        const snaps = getCurrentSnapList();
         let raw = radiusInput.value.trim();
+
+        // --- AUTO-DETECT UNIT ---
+        // Look for "mi" or "km" (case-insensitive, space or no space)
+        const unitMatch = raw.match(/(\d+(?:\.\d+)?)\s*(mi|km)$/i);
+
+        if (unitMatch) {
+          let value = unitMatch[1];
+          let unit = unitMatch[2].toLowerCase();
+
+          // Switch actual selected unit
+          if (unit === "mi") {
+            unitMiles.checked = true;
+            currentUnit = "mi";
+          } else {
+            unitKm.checked = true;
+            currentUnit = "km";
+          }
+
+          // Remove unit text from the field
+          raw = value;
+          radiusInput.value = value;
+        }
+        // --- END AUTO-DETECT UNIT ---
+
+        const snaps = getCurrentSnapList();
 
         // Allow digits + optional decimal
         if (!/^\d*\.?\d*$/.test(raw)) {
