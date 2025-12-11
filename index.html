@@ -444,6 +444,35 @@
       /* Grey-out for random start */
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
+
+      let lastValidCoord = coordInput.value;
+
+      coordInput.addEventListener("blur", () => {
+        let v = coordInput.value.trim();
+        if (v === "") return;
+
+        // Try to detect decimal-format: two numeric parts separated by space/comma
+        let parts = v.split(/[, ]+/).filter(x => x.length > 0);
+
+        if (parts.length === 2) {
+          let lat = Number(parts[0]);
+          let lon = Number(parts[1]);
+
+          // If BOTH parsed successfully as numbers → treat as decimal coordinate
+          if (!Number.isNaN(lat) && !Number.isNaN(lon)) {
+            lat = Number(lat.toFixed(6));
+            lon = Number(lon.toFixed(6));
+            coordInput.value = `${lat}, ${lon}`;
+            lastValidCoord = coordInput.value;
+            return;
+          }
+        }
+
+        // Otherwise: assume DMS or unknown → DO NOT round or restrict
+        // Just record what the user typed
+        lastValidCoord = v;
+      });
+
       randomBox.addEventListener("change", () => {
         coordInput.disabled = randomBox.checked;
       });
@@ -489,6 +518,9 @@
       });
 
       /* Radius logic */
+
+      // Track last valid radius value
+      let lastValidRadius = "100";
 
       const SNAP_MILES = [
         1, 2, 3, 5, 10, 15, 20, 30, 50, 75,
@@ -552,21 +584,57 @@
       // Textbox → Slider (snap slider only, keep precise value)
       function handleRadiusInputChange() {
         const snaps = getCurrentSnapList();
-        let raw = radiusInput.value.replace(/[^0-9.]/g, "");
-        if (raw === "") return;
+        let raw = radiusInput.value.trim();
 
-        let num = Math.round(Number(raw));
-        if (Number.isNaN(num)) num = snaps[0];
+        // Allow digits + optional decimal
+        if (!/^\d*\.?\d*$/.test(raw)) {
+          radiusInput.value = lastValidRadius;
+          return;
+        }
+
+        if (raw === "" || raw === ".") {
+          radiusInput.value = lastValidRadius;
+          return;
+        }
+
+        let num = Number(raw);
+        if (Number.isNaN(num)) {
+          radiusInput.value = lastValidRadius;
+          return;
+        }
+
+        // Count decimals in the input
+        let decimals = 0;
+        const dot = raw.indexOf(".");
+        if (dot !== -1) {
+          decimals = raw.length - dot - 1;
+        }
+
+        // If user went to 2+ decimals → round to 1 decimal place
+        if (decimals >= 2) {
+          num = Number(num.toFixed(1));
+        }
+
+        // Clamp to allowed range
         if (num < snaps[0]) num = snaps[0];
         if (num > snaps[snaps.length - 1]) num = snaps[snaps.length - 1];
 
+        // Snap slider to nearest snap value
         const idx = findNearestIndex(snaps, num);
         radiusSlider.value = idx;
-        radiusInput.value = num;   // ← key change: keep the exact (clamped) number
+
+        // Display formatting:
+        // - If x.0 → show integer
+        // - Else → show "x" or "x.x"
+        let out =
+          Number.isInteger(num) ? num.toString() : num.toFixed(1).replace(/\.0$/, "");
+
+        radiusInput.value = out;
+        lastValidRadius = out;
       }
 
-      radiusInput.addEventListener("change", handleRadiusInputChange);
       radiusInput.addEventListener("blur", handleRadiusInputChange);
+      radiusInput.addEventListener("change", handleRadiusInputChange);
 
       // Unit switching
       unitKm.addEventListener("change", () => {
