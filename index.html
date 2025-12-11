@@ -498,7 +498,7 @@
 
         // --- DMS NORMALIZER (NO DECIMAL CONVERSION) ---
         (function() {
-          const dmsRegex = /(\d+)\s*º\s*(\d+)[′']?\s*(\d+(?:\.\d+)?)?["″]?\s*([NSEW])/gi;
+          const dmsRegex = /(\d+)\s*º\s*(\d+)[′']?\s*(\d+(?:\.\d*)?)?["″]?\s*([NSEW])/gi;
           let matches = [...v.matchAll(dmsRegex)];
 
           if (matches.length !== 2) return;  // must be exactly lat + lon
@@ -518,6 +518,10 @@
             let secStr = sec % 1 === 0
               ? sec.toFixed(0)   // integer → "54"
               : sec.toFixed(1);  // keep one decimal
+
+            // Remove trailing .0 OR trailing "."
+            if (secStr.endsWith(".0")) secStr = secStr.slice(0, -2);
+            if (secStr.endsWith("."))  secStr = secStr.slice(0, -1);
 
             secStr = secStr.padStart(2, "0");
 
