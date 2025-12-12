@@ -485,11 +485,20 @@
         }
 
         // --- PURE DECIMAL FORMS ("40.12 -73.55", "(40.12 -73.55)") ---
-        let pair = v.match(/-?\d+(?:\.\d+)?/g);
+        let pair = v.match(/-?(?:\d+(?:\.\d+)?|\.\d+)/g);
 
         if (pair && pair.length === 2) {
-          let lat = Number(pair[0]).toFixed(6);
-          let lon = Number(pair[1]).toFixed(6);
+          function normalizeDecimal(s) {
+            return s
+              .replace(/\.$/, "")              // remove trailing dot
+              .replace(/^(-?)\./, "$10.");     // add leading zero if needed
+          }
+
+          let latRaw = normalizeDecimal(pair[0]);
+          let lonRaw = normalizeDecimal(pair[1]);
+
+          let lat = Number(latRaw).toFixed(6);
+          let lon = Number(lonRaw).toFixed(6);
 
           coordInput.value = `${lat}, ${lon}`;
           lastValidCoord = coordInput.value;
@@ -498,7 +507,7 @@
 
         // --- DMS NORMALIZER (NO DECIMAL CONVERSION) ---
         (function() {
-          const dmsRegex = /(\d+)\s*º\s*(\d+)[′']?\s*(\d+(?:\.\d*)?)?["″]?\s*([NSEW])/gi;
+          const dmsRegex = /(\d+)\s*º\s*(\d+)[′']?\s*((?:\d+|\d*\.\d+|\d+\.)?)?["″]?\s*([NSEW])/gi;
           let matches = [...v.matchAll(dmsRegex)];
 
           if (matches.length !== 2) return;  // must be exactly lat + lon
@@ -514,16 +523,22 @@
             // minutes always 2 digits
             const minStr = min.toString().padStart(2, "0");
 
-            // seconds formatting: strip .0 if present
-            let secStr = sec % 1 === 0
-              ? sec.toFixed(0)   // integer → "54"
-              : sec.toFixed(1);  // keep one decimal
+            // format seconds
+            let secStr =
+              sec % 1 === 0
+                ? sec.toFixed(0)
+                : sec.toFixed(1);
 
-            // Remove trailing .0 OR trailing "."
-            if (secStr.endsWith(".0")) secStr = secStr.slice(0, -2);
-            if (secStr.endsWith("."))  secStr = secStr.slice(0, -1);
+            // remove trailing ".0" or trailing "."
+            secStr = secStr.replace(/\.0$/, "").replace(/\.$/, "");
 
-            secStr = secStr.padStart(2, "0");
+            // ensure leading zero for decimals (".8" → "0.8")
+            if (secStr.startsWith(".")) secStr = "0" + secStr;
+
+            // ensure two-digit whole seconds ("8" → "08")
+            if (!secStr.includes(".") && secStr.length === 1) {
+              secStr = "0" + secStr;
+            }
 
             return `${deg}º${minStr}'${secStr}"${m[4].toUpperCase()}`;
           }
