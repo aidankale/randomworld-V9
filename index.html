@@ -16,7 +16,6 @@
         padding: 0;
         font-family: sans-serif;
         line-height: 1.5;
-        overflow-x: hidden;
       }
 
       #map-placeholder {
@@ -101,10 +100,6 @@
         margin-left: 4px;
         position: relative;
         pointer-events: auto !important;
-      }
-
-      .info-icon {
-        position: relative;
         z-index: 10000;
       }
 
@@ -370,10 +365,6 @@
         .tooltip.visible {
           opacity: 1 !important;
           pointer-events: auto !important;
-        }
-
-        /* Force tooltip to appear above the icon in a fixed, consistent position on mobile */
-        .tooltip.visible {
           position: absolute !important;
           left: 50% !important;
           bottom: 20px !important;
@@ -1173,7 +1164,6 @@
 
       // Advanced Settings toggle logic
       const advToggle = document.querySelector(".advanced-toggle");
-      const advTriangle = advToggle.querySelector(".arrow");
       const advSection = document.getElementById("advanced-section");
 
       advToggle.addEventListener("click", () => {
@@ -1185,9 +1175,6 @@
           advSection.style.display = "none";
         }
       });
-
-      // Store the previous state of the "Avoid Antarctica" checkbox
-      let previousAvoidAntarcticaState = true; // default to checked
 
       const landBox  = document.getElementById("land-restriction");
       const avoidBox = document.getElementById("avoid-antarctica");
