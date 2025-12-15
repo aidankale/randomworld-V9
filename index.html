@@ -711,6 +711,25 @@
         }
       });
 
+      const infoMinDistance = document.getElementById("info-min-distance");
+      const tooltipMinDistance = infoMinDistance.querySelector(".tooltip");
+
+      infoMinDistance.addEventListener("click", (e) => {
+        if (!isMobile()) return;
+        e.stopPropagation();
+        tooltipMinDistance.classList.toggle("visible");
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!isMobile()) return;
+        if (
+          !tooltipMinDistance.contains(e.target) &&
+          !infoMinDistance.contains(e.target)
+        ) {
+          tooltipMinDistance.classList.remove("visible");
+        }
+      });
+
       /* Radius logic */
 
       // Track last valid radius value
