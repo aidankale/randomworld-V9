@@ -53,7 +53,7 @@
         margin-top: 15px;
         display: flex;
         align-items: flex-start;
-        gap: 12px;
+        gap: 8px;
       }
 
       .textbox-column {
@@ -103,9 +103,28 @@
         pointer-events: auto !important;
       }
 
+      .info-icon {
+        position: relative;
+        z-index: 10000;
+      }
+
       .coord-help .info-icon {
         vertical-align: middle;
         transform: translateY(-1px);
+      }
+
+      .random-label input[type="checkbox"] {
+        position: relative;
+        top: 1px; /* adjust to 2px or 4px if needed */
+      }      
+      
+      .random-label {
+        position: relative;
+        z-index: 1;
+      }
+
+      #info-min-distance {
+        line-height: 15px;
       }
 
       .tooltip {
@@ -123,6 +142,10 @@
         pointer-events: none;
         transition: opacity 0.2s ease;
         z-index: 9999;
+      }
+
+      #info-min-distance .tooltip {
+        text-align: center;
       }
 
       @media (hover: hover) and (pointer: fine) {
@@ -161,6 +184,12 @@
         font-size: 16px;
       }
 
+      #min-distance-input {
+        width: 47px;
+        padding: 4px 6px;
+        font-size: 16px;
+      }
+
       .radius-unit-option {
         display: flex;
         align-items: center;
@@ -176,6 +205,12 @@
         display: block;
       }
 
+      #min-distance-slider {
+        width: 266px;
+        max-width: 100%;
+        display: block;
+      }
+      
       .radius-slider-row {
         margin-top: 4px;
       }
@@ -216,7 +251,6 @@
       #advanced-section {
         display: none; /* hidden until we turn it on later */
         margin-top: 10px;
-        padding-left: 4px;
       }
 
       #advanced-section label {
@@ -241,7 +275,7 @@
       }
 
       .antarctica-row .info-icon {
-        margin-top: -7px;      /* shift upward slightly */
+        margin-top: -6px;      /* shift upward slightly */
         vertical-align: middle;
       }
 
@@ -249,7 +283,30 @@
         color: #aaa;
       }
 
+      .min-distance-controls {
+        align-items: center;
+      }
 
+      #info-min-distance {
+        margin-left: 2px; /* or 1px if you want it tighter */
+      }
+
+      #min-distance-block .radius-unit-option {
+        gap: 2px; /* optional fine-tune */
+      }
+
+      /* MANUAL vertical tweak — MIN DISTANCE UNITS ONLY */
+      #min-distance-block .radius-unit-option {
+        position: relative;
+        top: 4px; /* ← adjust this */
+      }
+
+      /* MANUAL vertical tweak — ENTIRE minimum distance block */
+      #min-distance-block {
+        position: relative;
+        top: -5px; /* ← adjust this */
+      }
+      
       /* MOBILE VERSION */
       @media (max-width: 768px) {
 
@@ -365,13 +422,14 @@
             DMS or decimal
             <span class="info-icon" id="info-icon">i
               <span class="tooltip" id="tooltip">
-                Example: 40.748444, -73.985667 or 40º44'54.4"N 73º59'08.4"W
+                Example: &nbsp;&nbsp;40.748444, -73.985667<br>
+                or &nbsp;&nbsp;40º44'54.4"N 73º59'08.4"W
               </span>
             </span>
           </div>
         </div>
 
-        <label>
+        <label class="random-label">
           <input type="checkbox" id="random-start">
           Random
         </label>
@@ -434,6 +492,54 @@
               Avoids land below 60°S
             </span>
           </span>
+        </div>
+
+        <div class="radius-block" id="min-distance-block">
+
+          <div class="radius-row">
+            <span class="radius-label">
+              Minimum distance:
+              <span class="info-icon" id="info-min-distance">i
+                <span class="tooltip">
+                  The smallest distance allowed<br>
+                  between two consecutive coordinates
+                </span>
+              </span>
+            </span>
+
+            <div class="radius-controls min-distance-controls">
+              <input
+                type="text"
+                id="min-distance-input"
+                placeholder="30"
+              >
+
+              <label class="radius-unit-option">
+                <input type="radio" name="min-distance-unit" value="m" checked>
+                m
+              </label>
+
+              <label class="radius-unit-option">
+                <input type="radio" name="min-distance-unit" value="km">
+                km
+              </label>
+
+              <label class="radius-unit-option">
+                <input type="radio" name="min-distance-unit" value="ft">
+                ft
+              </label>
+
+              <label class="radius-unit-option">
+                <input type="radio" name="min-distance-unit" value="mi">
+                mi
+              </label>
+            </div>
+          </div>
+
+          <div class="radius-slider-row">
+            <input type="range" id="min-distance-slider">
+          </div>
+
         </div>
 
       </div>
@@ -619,10 +725,72 @@
         7500, 10000, 20000
       ];
 
+      const SNAP_METRIC = [
+        3, 5, 10, 20, 50, 100, 500,
+        1000, 2000, 3000, 5000,
+        10000, 15000, 20000,
+        30000, 50000, 75000,
+        100000, 150000, 200000
+      ]; // meters
+
+      const SNAP_IMPERIAL = [
+        10, 20, 50, 75, 100, 200, 500,
+        1000, 2000,
+        5280, 10560, 15840, 26400,
+        52800, 79200, 105600,
+        158400, 264000, 396000, 528000
+      ]; // feet
+
       const radiusInput = document.getElementById("radius-input");
       const radiusSlider = document.getElementById("radius-slider");
       const unitMiles   = document.getElementById("radius-unit-mi");
       const unitKm      = document.getElementById("radius-unit-km");
+
+      const minInput   = document.getElementById("min-distance-input");
+      const minSlider  = document.getElementById("min-distance-slider");
+      const minUnits   = document.querySelectorAll("input[name='min-distance-unit']");
+
+      let minUnit = "m";        // default
+      let lastMinMeters = 30;
+
+      function metersToFeet(m) {
+        return m * 3.28084;
+      }
+
+      function feetToMeters(ft) {
+        return ft / 3.28084;
+      }
+
+      function applyMinDisplay(meters) {
+        let value, unit;
+
+        if (minUnit === "m" || minUnit === "km") {
+          if (meters >= 1000) {
+            unit = "km";
+            value = (meters / 1000).toFixed(1);
+          } else {
+            unit = "m";
+            value = Math.round(meters).toString();
+          }
+        } else {
+          const ft = metersToFeet(meters);
+          if (ft >= 5280) {
+            unit = "mi";
+            value = (ft / 5280).toFixed(1);
+          } else {
+            unit = "ft";
+            value = Math.round(ft).toString();
+          }
+        }
+
+        minInput.value = value.replace(/\.0$/, "");
+        lastMinMeters = meters;
+
+        minUnits.forEach(u => u.checked = u.value === unit);
+        if (minUnit !== unit) {
+          minUnit = unit;
+        }
+      }
 
       // KM is the default
       let currentUnit = "km";
@@ -710,6 +878,9 @@
           return;
         }
 
+        // Enforce absolute minimum of 0.1
+        if (num < 0.1) num = 0.1;
+
         // Count decimals in the input
         let decimals = 0;
         const dot = raw.indexOf(".");
@@ -723,7 +894,6 @@
         }
 
         // Clamp to allowed range
-        if (num < snaps[0]) num = snaps[0];
         if (num > snaps[snaps.length - 1]) num = snaps[snaps.length - 1];
 
         // Snap slider to nearest snap value
@@ -738,6 +908,17 @@
 
         radiusInput.value = out;
         lastValidRadius = out;
+      }
+
+      function initMinDistance() {
+        minSlider.min = 0;
+        minSlider.max = SNAP_METRIC.length - 1;
+        minSlider.step = 1;
+
+        const idx = findNearestIndex(SNAP_METRIC, lastMinMeters);
+        minSlider.value = idx;
+
+        minInput.value = "30";
       }
 
       radiusInput.addEventListener("blur", handleRadiusInputChange);
@@ -758,6 +939,212 @@
         radiusSlider.min = 0;
         radiusSlider.max = SNAP_MILES.length - 1;
         handleRadiusInputChange();
+      });
+
+      minSlider.addEventListener("input", () => {
+        let meters;
+
+        if (minUnit === "m" || minUnit === "km") {
+          meters = SNAP_METRIC[minSlider.value];
+        } else {
+          meters = feetToMeters(SNAP_IMPERIAL[minSlider.value]);
+        }
+
+        applyMinDisplay(meters);
+      });
+
+      function handleMinInputCommit() {
+        let raw = minInput.value.trim();
+        if (!raw || raw === ".") {
+          applyMinDisplay(lastMinMeters);
+          return;
+        }
+
+        let num = Number(raw);
+        if (Number.isNaN(num)) {
+          applyMinDisplay(lastMinMeters);
+          return;
+        }
+
+        let meters;
+
+        switch (minUnit) {
+
+          case "m": {
+            meters = Math.round(num);
+            if (meters < 3) meters = 3;
+
+            if (meters >= 1000) {
+              minUnit = "km";
+              minInput.value = (meters / 1000).toFixed(1).replace(/\.0$/, "");
+            } else {
+              minInput.value = meters.toString();
+            }
+            break;
+          }
+
+          case "ft": {
+            let ft = Math.round(num);
+            if (ft < 10) ft = 10;
+
+            if (ft >= 5280) {
+              minUnit = "mi";
+              minInput.value = (ft / 5280).toFixed(1).replace(/\.0$/, "");
+            } else {
+              minInput.value = ft.toString();
+            }
+            meters = feetToMeters(ft);
+            break;
+          }
+
+          case "km": {
+            let km = Number(num.toFixed(1));
+
+            if (km < 1) {
+              minUnit = "m";
+              meters = Math.max(3, Math.round(km * 1000));
+              minInput.value = meters.toString();
+            } else {
+              if (km > 2000) km = 2000;
+              meters = km * 1000;
+              minInput.value = km.toString();
+            }
+            break;
+          }
+
+          case "mi": {
+            let mi = Number(num.toFixed(1));
+
+            if (mi < 1) {
+              minUnit = "ft";
+              let ft = Math.round(mi * 5280);
+              if (ft < 10) ft = 10;
+              meters = feetToMeters(ft);
+              minInput.value = ft.toString();
+            } else {
+              if (mi > 1200) mi = 1200;
+              meters = feetToMeters(mi * 5280);
+              minInput.value = mi.toString();
+            }
+            break;
+          }
+        }
+
+        lastMinMeters = meters;
+
+        // update radios
+        minUnits.forEach(u => u.checked = u.value === minUnit);
+
+        // update slider
+        const snaps =
+          minUnit === "m" || minUnit === "km"
+            ? SNAP_METRIC
+            : SNAP_IMPERIAL;
+
+        minSlider.value = findNearestIndex(snaps, meters);
+      }
+
+      minInput.addEventListener("blur", handleMinInputCommit);
+      minInput.addEventListener("change", handleMinInputCommit);
+
+      minUnits.forEach(radio => {
+        radio.addEventListener("change", () => {
+          if (!radio.checked) return;
+
+          const newUnit = radio.value;
+
+          // read current displayed number
+          let raw = minInput.value.trim();
+          if (!raw || raw === ".") return;
+
+          let num = Number(raw);
+          if (Number.isNaN(num)) return;
+
+          let value = num;
+
+          // apply per-unit caps + rounding
+          switch (newUnit) {
+
+            case "m": {
+              let meters = value;
+
+              if (meters >= 1000) {
+                minUnit = "km";
+                value = Number((meters / 1000).toFixed(1));
+              } else {
+                minUnit = "m";
+                value = Math.round(meters);
+                if (value < 3) value = 3;
+              }
+              break;
+            }
+
+            case "km": {
+              let km = value;
+
+              if (km < 1) {
+                minUnit = "m";
+                value = Math.round(km * 1000);
+                if (value < 3) value = 3;
+              } else {
+                minUnit = "km";
+                value = Number(km.toFixed(1));
+                if (value > 2000) value = 2000;
+              }
+              break;
+            }
+
+            case "ft": {
+              let ft = value;
+
+              if (ft >= 5280) {
+                minUnit = "mi";
+                value = Number((ft / 5280).toFixed(1));
+              } else {
+                minUnit = "ft";
+                value = Math.round(ft);
+                if (value < 10) value = 10;
+              }
+              break;
+            }
+
+            case "mi": {
+              let mi = value;
+
+              if (mi < 1) {
+                minUnit = "ft";
+                value = Math.round(mi * 5280);
+                if (value < 10) value = 10;
+              } else {
+                minUnit = "mi";
+                value = Number(mi.toFixed(1));
+                if (value > 1200) value = 1200;
+              }
+              break;
+            }
+          }
+
+          minInput.value = value.toString();
+
+          // update checked radio if unit auto-switched
+          minUnits.forEach(u => {
+            u.checked = u.value === minUnit;
+          });
+
+          // update slider position to match displayed value
+          const snaps =
+            minUnit === "m" || minUnit === "km"
+              ? SNAP_METRIC
+              : SNAP_IMPERIAL;
+
+          let baseValue =
+            minUnit === "m" ? Number(minInput.value) :
+            minUnit === "km" ? Number(minInput.value) * 1000 :
+            minUnit === "ft" ? Number(minInput.value) :
+            Number(minInput.value) * 5280;
+
+          minSlider.value = findNearestIndex(snaps, baseValue);
+        });
       });
 
       // Advanced Settings toggle logic
@@ -789,6 +1176,8 @@
       });
 
       initRadiusControls();
+
+      initMinDistance();
 
     </script>
 
