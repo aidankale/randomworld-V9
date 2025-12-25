@@ -305,6 +305,7 @@
       /* MOBILE VERSION */
       @media (hover: none) and (pointer: coarse) {
 
+
         #map-placeholder {
           height: 40vh;
         }
@@ -333,6 +334,11 @@
           margin-bottom: 0px;
         }
 
+        .coord-row > span,
+        .radius-label {
+          line-height: 1.5;
+        }
+
         .textbox-column {
           width: 70%;
           align-items: flex-start;
@@ -340,7 +346,7 @@
         }
 
         .coord-row input[type="text"] {
-          width: 70%;
+          width: 220px;
           padding: 8px;
           font-size: 16px;
         }
@@ -352,9 +358,9 @@
           margin-right: 0;
         }
 
-        .coord-row > label:last-child {
-          margin-left: -60px;
-          margin-top: -27px;
+        .coord-row > label.random-label {
+          margin-left: 0;
+          margin-top: 8px;
         }
 
         .tooltip {
@@ -386,7 +392,7 @@
         }
 
         #radius-input {
-          width: 15%;
+          width: 47px;
         }
 
         .radius-slider-row {
@@ -394,7 +400,7 @@
         }
 
         #radius-slider {
-          width: 70%;   /* proportionally matches input row on mobile */
+          width: 266px;
         }
       }
     </style>
