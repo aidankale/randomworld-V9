@@ -545,7 +545,12 @@
     </div>
 
     <script>
-      /* Grey-out for random start */
+      function roundTo(n, decimals) {
+        const factor = 10 ** decimals;
+        const eps = Number.EPSILON * factor * 2;
+        return Math.round((n * factor + eps)) / factor;
+      }
+
       const randomBox = document.getElementById("random-start");
       const coordInput = document.getElementById("start-coordinate");
 
@@ -563,11 +568,13 @@
           .replace(/\s+/g, " ")        // collapse spaces
           .trim();
 
+        const hasDegreeSymbol = /º/.test(v);
+
         // --- DECIMAL WITH N/S/E/W (like "40.12 N 73.55 W") ---
         let ns = v.match(/([NS])/i);
         let ew = v.match(/([EW])/i);
 
-        if (ns && ew) {
+        if (!hasDegreeSymbol && ns && ew) {
           let nums = v.match(/-?\d+(\.\d+)?/g);
           if (nums && nums.length === 2) {
             let lat = parseFloat(nums[0]);
@@ -591,7 +598,7 @@
         // --- PURE DECIMAL FORMS ("40.12 -73.55", "(40.12 -73.55)") ---
         let pair = v.match(/-?(?:\d+(?:\.\d+)?|\.\d+)/g);
 
-        if (pair && pair.length === 2) {
+        if (!hasDegreeSymbol && pair && pair.length === 2) {
           function normalizeDecimal(s) {
             return s
               .replace(/\.$/, "")              // remove trailing dot
@@ -601,13 +608,32 @@
           let latRaw = normalizeDecimal(pair[0]);
           let lonRaw = normalizeDecimal(pair[1]);
 
-          let lat = Number(latRaw).toFixed(6);
-          let lon = Number(lonRaw).toFixed(6);
+          let lat = roundTo(Number(latRaw), 6).toFixed(6);
+          let lon = roundTo(Number(lonRaw), 6).toFixed(6);
 
           coordInput.value = `${lat}, ${lon}`;
           lastValidCoord = coordInput.value;
           return;
         }
+
+        // --- DEGREE + CARDINAL ONLY (e.g. "1ºN 1ºW") ---
+        (function() {
+          if (!hasDegreeSymbol) return;
+
+          const degCard = [...v.matchAll(/(\d+)\s*º\s*([NSEW])/gi)];
+          if (degCard.length !== 2) return;
+
+          const lat = degCard.find(m => /[NS]/i.test(m[2]));
+          const lon = degCard.find(m => /[EW]/i.test(m[2]));
+          if (!lat || !lon) return;
+
+          coordInput.value =
+            `${lat[1]}º00'00"${lat[2].toUpperCase()} ` +
+            `${lon[1]}º00'00"${lon[2].toUpperCase()}`;
+
+          lastValidCoord = coordInput.value;
+          return;
+        })();
 
         // --- DMS NORMALIZER (NO DECIMAL CONVERSION) ---
         (function() {
@@ -622,7 +648,7 @@
             let sec = Number(m[3] || 0);
 
             // round to tenths place
-            sec = Number(sec.toFixed(1));
+            sec = roundTo(sec, 1);
 
             // minutes always 2 digits
             const minStr = min.toString().padStart(2, "0");
@@ -658,6 +684,10 @@
         })();
         // Just record what the user typed
         lastValidCoord = v;
+      });
+
+      coordInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") coordInput.blur();
       });
 
       randomBox.addEventListener("change", () => {
@@ -907,7 +937,7 @@
 
         // If user went to 2+ decimals → round to 1 decimal place
         if (decimals >= 2) {
-          num = Number(num.toFixed(1));
+          num = roundTo(num, 1);
         }
 
         // Clamp to allowed range
@@ -915,8 +945,9 @@
 
         // Snap slider to nearest snap value
         const idx = findNearestIndex(snaps, num);
-        radiusSlider.value = idx;
-
+        if (num >= snaps[0]) {
+          radiusSlider.value = idx;
+        }
         // Display formatting:
         // - If x.0 → show integer
         // - Else → show "x" or "x.x"
@@ -939,7 +970,10 @@
       }
 
       radiusInput.addEventListener("blur", handleRadiusInputChange);
-      radiusInput.addEventListener("change", handleRadiusInputChange);
+
+      radiusInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") radiusInput.blur();
+      });
 
       // Unit switching
       unitKm.addEventListener("change", () => {
@@ -1015,34 +1049,21 @@
           }
 
           case "km": {
-            let km = Number(num.toFixed(1));
+            let km = Math.max(0.1, roundTo(num, 1));
 
-            if (km < 1) {
-              minUnit = "m";
-              meters = Math.max(3, Math.round(km * 1000));
-              minInput.value = meters.toString();
-            } else {
-              if (km > 2000) km = 2000;
-              meters = km * 1000;
-              minInput.value = km.toString();
-            }
+            // stay in km for values < 1
+            meters = Math.max(3, Math.round(km * 1000));
+            minInput.value = km.toString();
             break;
           }
-
+          
           case "mi": {
-            let mi = Number(num.toFixed(1));
+            let mi = Math.max(0.1, roundTo(num, 1));
 
-            if (mi < 1) {
-              minUnit = "ft";
-              let ft = Math.round(mi * 5280);
-              if (ft < 10) ft = 10;
-              meters = feetToMeters(ft);
-              minInput.value = ft.toString();
-            } else {
-              if (mi > 1200) mi = 1200;
-              meters = feetToMeters(mi * 5280);
-              minInput.value = mi.toString();
-            }
+            // stay in mi for values < 1
+            let ft = mi * 5280;
+            meters = Math.max(3, feetToMeters(ft));
+            minInput.value = mi.toString();
             break;
           }
         }
@@ -1063,6 +1084,10 @@
 
       minInput.addEventListener("blur", handleMinInputCommit);
       minInput.addEventListener("change", handleMinInputCommit);
+
+      minInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") minInput.blur();
+      });
 
       minUnits.forEach(radio => {
         radio.addEventListener("change", () => {
