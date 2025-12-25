@@ -303,7 +303,7 @@
       }
       
       /* MOBILE VERSION */
-      @media (max-width: 768px) {
+      @media (hover: none) and (pointer: coarse) {
 
         #map-placeholder {
           height: 40vh;
@@ -575,7 +575,7 @@
         let ew = v.match(/([EW])/i);
 
         if (!hasDegreeSymbol && ns && ew) {
-          let nums = v.match(/-?\d+(\.\d+)?/g);
+          let nums = v.match(/-?(?:\d+(?:\.\d+)?|\.\d+)/g);
           if (nums && nums.length === 2) {
             let lat = parseFloat(nums[0]);
             let lon = parseFloat(nums[1]);
@@ -1004,6 +1004,9 @@
         applyMinDisplay(meters);
       });
 
+      const MAX_KM = 2000;
+      const MAX_MI = 1200;
+
       function handleMinInputCommit() {
         let raw = minInput.value.trim();
         if (!raw || raw === ".") {
@@ -1066,6 +1069,16 @@
             minInput.value = mi.toString();
             break;
           }
+        }
+
+        // enforce per-unit maximums on typed input
+        if (minUnit === "km" && meters > MAX_KM * 1000) {
+          meters = MAX_KM * 1000;
+          minInput.value = MAX_KM.toString();
+        }
+        if (minUnit === "mi" && meters > MAX_MI * 1609.344) {
+          meters = MAX_MI * 1609.344;
+          minInput.value = MAX_MI.toString();
         }
 
         lastMinMeters = meters;
